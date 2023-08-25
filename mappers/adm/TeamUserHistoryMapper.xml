@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.TeamUserHistoryMapper">
+    <resultMap type="TeamUserHistoryVO" id="TeamUserHistoryVOMap">
+        <result property="teamUsrHisId" column="TEAM_USR_HIS_ID" javaType="String"/>
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="preTeamId" column="PRE_TEAM_ID" javaType="String"/>
+        <result property="aplyStDt" column="APLY_ST_DT" javaType="java.sql.Date"/>
+        <result property="aplyEndDt" column="APLY_END_DT" javaType="java.sql.Date"/>
+        <result property="aproOwnrFlg" column="APRO_OWNR_FLG" javaType="String"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+    </resultMap>
+
+    <resultMap type="AdmTeamUsrVO" id="AdmTeamUsrMap">
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="aplyStDt" column="APLY_ST_DT" javaType="java.sql.Date"/>
+        <result property="aplyEndDt" column="APLY_END_DT" javaType="java.sql.Date"/>
+    </resultMap>
+    <insert id="insertTeamUserHistory">
+        insert /** TeamUserHistory.insertTeamUserHistory */
+        into ADM_TEAM_USR_HIS(TEAM_USR_HIS_ID,
+        USR_ID,
+        TEAM_ID,
+        <if test="preTeamId != null and preTeamId != ''">
+            PRE_TEAM_ID,
+        </if>
+        APLY_ST_DT,
+        APLY_END_DT,
+        APRO_OWNR_FLG,
+        WRK_FLG,
+        cre_usr_id,
+        cre_dt,
+        upd_usr_id,
+        upd_dt)
+        values (fc_get_seqno('TUH'),
+        #{usrId},
+        #{teamId},
+        <if test="preTeamId != null and preTeamId != ''">
+            #{preTeamId},
+        </if>
+
+        #{aplyStDt},
+        #{aplyEndDt},
+        #{aproOwnrFlg},
+        'Y',
+        #{createUser},
+        sysdate,
+        #{updateUser},
+        sysdate)
+    </insert>
+
+    <update id="updateApplyEndDate">
+        update /** TeamUserHistory.updateApplyEndDate */
+            ADM_TEAM_USR_HIS
+        set APLY_END_DT = sysdate,
+            WRK_FLG     = 'N',
+            upd_usr_id  = #{updateUser},
+            upd_dt      = sysdate
+        where 1 = 1
+          and TEAM_ID = #{teamId}
+          and USR_ID = #{usrId}
+          and APRO_OWNR_FLG = #{aproOwnrFlg}
+    </update>
+
+    <update id="updateHistoryAfterUsrRemove" parameterType="hashMap">
+        update /** TeamUserHistory.updateHistoryAfterUsrRemove */
+            ADM_TEAM_USR_HIS
+        set APLY_END_DT = sysdate,
+            WRK_FLG     = 'N',
+            APRO_OWNR_FLG = 'N',
+            upd_usr_id  = #{updateUser},
+            upd_dt      = sysdate
+        where 1 = 1
+            and USR_ID = #{usrId}
+            and WRK_FLG     = 'Y'
+    </update>
+
+    <select id="getCurrentMainTeam" resultMap="AdmTeamUsrMap">
+        select /** TeamUserHistory.getCurrentMainTeam */
+            TEAM_ID,
+            APLY_ST_DT,
+            APLY_END_DT
+        from ADM_TEAM_USR
+        where 1 = 1
+          and USR_ID = #{usrId}
+          and APRO_OWNR_FLG = 'Y'
+    </select>
+
+    <select id="getNumberOfTeamById" resultType="Integer">
+        select /** TeamUserHistory.getNumberOfTeamById */
+            COUNT(*)
+        from ADM_TEAM_USR
+        where 1 = 1
+          and USR_ID = #{usrId}
+          and TEAM_ID = #{teamId}
+          and APRO_OWNR_FLG = #{ownerFlg}
+    </select>
+
+    <update id="updateHistoryDate">
+        update /** TeamUserHistory.updateHistoryDate */
+            ADM_TEAM_USR_HIS
+        set APLY_ST_DT  = #{aplyStDt},
+            APLY_END_DT = #{aplyEndDt},
+            upd_usr_id  = #{updateUser},
+            upd_dt      = sysdate
+        where 1 = 1
+          and USR_ID = #{usrId}
+          and TEAM_ID = #{teamId}
+          and WRK_FLG = 'Y'
+    </update>
+
+    <update id="updateAproOnwrFlg">
+        update /** TeamUserHistory.updateAproOnwrFlg */
+            ADM_TEAM_USR_HIS
+        set APRO_OWNR_FLG = #{aproOwnrFlg},
+            upd_usr_id    = #{updateUser},
+            upd_dt        = sysdate
+        where 1 = 1
+            and USR_ID = #{usrId} 
+            and TEAM_ID = #{teamId}
+            and APLY_ST_DT  = #{aplyStDt}
+    </update>
+
+    <update id="updateHistoryAfterTeamRemove">
+        update /** TeamUserHistory.updateHistoryAfterTeamRemove */
+            ADM_TEAM_USR_HIS
+        set APLY_END_DT = sysdate,
+            WRK_FLG     = 'N',
+            APRO_OWNR_FLG = 'N',
+            upd_usr_id  = #{updateUser},
+            upd_dt      = sysdate
+        where 1 = 1
+            and TEAM_ID = #{teamId}
+            and WRK_FLG     = 'Y'
+    </update>
+</mapper>

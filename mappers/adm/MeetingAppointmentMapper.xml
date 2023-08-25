@@ -1,0 +1,1051 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.MeetingAppointmentMapper">
+    <resultMap id="AdmCoMap" type="AdmCoVO">
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="coNm" column="CO_NM" javaType="String"/>
+        <result property="ceoNm" column="CEO_NM" javaType="String"/>
+        <result property="addr" column="ADDR" javaType="String"/>
+        <result property="coTpCd" column="CO_TP_CD" javaType="String"/>
+        <result property="contactUsrId" column="CONTACT_USR_ID" javaType="String"/>
+        <result property="cntCd" column="CNT_CD" javaType="String"/>
+        <result property="ctyNm" column="CTY_NM" javaType="String"/>
+        <result property="endTmNo" column="END_TM_NO" javaType="Float"/>
+        <result property="lunHrNo" column="LUN_HR_NO" javaType="Float"/>
+        <result property="stLunTmNo" column="ST_LUN_TM_NO" javaType="Float"/>
+        <result property="stTmNo" column="ST_TM_NO" javaType="Float"/>
+        <result property="wrkHrNo" column="WRK_HR_NO" javaType="Float"/>
+        <result property="wrkDyCd" column="WRK_DY_CD" javaType="String"/>
+        <result property="utcTmNo" column="UTC_TM_NO" javaType="Float"/>
+        <result property="deltFlg" column="DELT_FLG" javaType="String"/>
+        <result property="createUser" column="CRE_USR_ID"/>
+        <result property="updateUser" column="UPD_USR_ID"/>
+        <result property="createDate" column="CRE_DT"/>
+        <result property="updateDate" column="UPD_DT"/>
+    </resultMap>
+    <select id="searchCompany" parameterType="map" resultMap="AdmCoMap">
+        /** adm.AppointmentManagementMappper.searchCompany */
+        SELECT ADM_CO.CO_CD CO_CD,
+        ADM_CO.CO_NM CO_NM,
+        ADM_CO.CEO_NM CEO_NM,
+        ADM_CO.ADDR ADDR,
+        ADM_CO.CO_TP_CD CO_TP_CD,
+        ADM_CO.CRE_USR_ID CRE_USR_ID,
+        ADM_CO.CRE_DT CRE_DT,
+        ADM_CO.UPD_USR_ID UPD_USR_ID,
+        ADM_CO.UPD_DT UPD_DT,
+        ADM_CO.CONTACT_USR_ID CONTACT_USR_ID,
+        ADM_CO.CNT_CD CNT_CD,
+        ADM_CO.CTY_NM CTY_NM,
+        ADM_CO.END_TM_NO END_TM_NO,
+        ADM_CO.LUN_HR_NO LUN_HR_NO,
+        ADM_CO.ST_LUN_TM_NO ST_LUN_TM_NO,
+        ADM_CO.ST_TM_NO ST_TM_NO,
+        ADM_CO.WRK_HR_NO WRK_HR_NO,
+        ADM_CO.WRK_DY_CD WRK_DY_CD,
+        ADM_CO.UTC_TM_NO UTC_TM_NO,
+        ADM_CO.DELT_FLG DELT_FLG
+        FROM ADM_CO
+        <if test="usrId !=  'admin'">
+            ,ADM_USR
+        </if>
+        WHERE
+        <if test="usrId !=  'admin'">
+            ADM_USR.CO_CD = ADM_CO.CO_CD
+            AND ADM_USR.USR_ID  = #{usrId} AND
+        </if>
+        ADM_CO.DELT_FLG = 'N'
+    </select>
+
+
+
+    <resultMap id="AdmMetgRoomMap" type="AdmMetgRoomVO">
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="roomId" column="ROOM_ID" javaType="String"/>
+        <result property="roomNm" column="ROOM_NM" javaType="String"/>
+        <result property="deltFlg" column="DELT_FLG" javaType="String"/>
+        <result property="ordNo" column="ORD_NO" javaType="Integer"/>
+        <result property="roomDesc" column="ROOM_DESC" javaType="String"/>
+        <result property="createUser" column="CRE_USR_ID" javaType="String"/>
+        <result property="flrNm" column="FLR_NM" javaType="String"/>
+        <result property="seatNo" column="SEAT_NO" javaType="Integer"/>
+        <result property="ofcCd" column="OFC_CD" javaType="String"/>
+    </resultMap>
+
+    <select id="searchMeetingRoomByCompany" resultMap="AdmMetgRoomMap" parameterType="map">
+        /**adm.MeetingAppointmentMapper.searchAllMeetingRoomWithCocd*/
+        select
+        CO_CD,
+        ROOM_ID,
+        ROOM_NM,
+        DELT_FLG,
+        ORD_NO,
+        ROOM_DESC,
+        CRE_USR_ID,
+        FLR_NM,
+        SEAT_NO,
+        OFC_CD
+        from ADM_METG_ROOM
+        where 1=1
+        AND DELT_FLG = 'N'
+        <if test="coCd !=  null">
+            AND CO_CD = #{coCd}
+        </if>
+        ORDER BY ORD_NO
+    </select>
+
+
+    <resultMap  id="ResultAppointmentForDay" type="java.util.HashMap">
+        <result property="apntId" 	column="APNT_ID"/>
+        <result property="coCd" 	column="CO_CD"/>
+        <result property="roomId" 	column="ROOM_ID"/>
+        <result property="roomNm" 	column="ROOM_NM"/>
+        <result property="apntNm" 	column="APNT_NM"/>
+        <result property="apntDesc" column="APNT_DESC"/>
+        <result property="recrcCd" 	column="RECRC_CD"/>
+        <result property="fmDt" 	column="FM_DT"/>
+        <result property="toDt" 	column="TO_DT"/>
+        <result property="stTm" 	column="ST_TM"/>
+        <result property="endTm" 	column="END_TM"/>
+        <result property="monFlg" 	column="MON_FLG"/>
+        <result property="tueFlg" 	column="TUE_FLG"/>
+        <result property="wedFlg" 	column="WED_FLG"/>
+        <result property="thuFlg" 	column="THU_FLG"/>
+        <result property="friFlg" 	column="FRI_FLG"/>
+        <result property="satFlg" 	column="SAT_FLG"/>
+        <result property="sunFlg" 	column="SUN_FLG"/>
+        <result property="creUsrId"	column="CRE_USR_ID"/>
+        <result property="usrNm" 	column="USR_NM"/>
+        <result property="imgUrl" 	column="IMG_URL"/>
+        <result property="apntDt" 	column="APNT_DT"/>
+        <result property="isPart" 	column="IS_PART"/>
+        <result property="cfmStsCd" column="CFM_STS_CD"/>
+    </resultMap>
+
+    <select id="searchAppointment" resultMap="ResultAppointmentForDay" parameterType="map">
+        /**adm.MeetingAppointmentMapper.searchAppointment*/
+        SELECT DISTINCT (AP.APNT_ID),
+        AP.CO_CD,
+        AP.ROOM_ID,
+        (SELECT ROOM_NM FROM ADM_METG_ROOM WHERE ROOM_ID = AP.ROOM_ID) ROOM_NM,
+        <if test="usrId != null">
+            CASE
+            WHEN (SELECT COUNT(*) FROM ADM_APNT_USR WHERE 1 = 1 AND USR_ID = #{usrId} AND APNT_ID = AP.APNT_ID) > 0 THEN 'Y'
+            WHEN AP.CRE_USR_ID = #{usrId} THEN 'Y'
+            ELSE 'N'
+            END IS_PART,
+            CASE
+            WHEN (SELECT COUNT(*) FROM ADM_APNT_USR WHERE 1 = 1 AND USR_ID = #{usrId} AND APNT_ID = AP.APNT_ID) > 0
+            THEN (
+            SELECT CFM_STS_CD
+            FROM ADM_APNT_USR_CFM
+            WHERE 1 = 1
+            AND APNT_ID = AP.APNT_ID
+            AND APNT_DT = TM.APNT_DT
+            AND USR_ID = #{usrId}
+            )
+            WHEN AP.CRE_USR_ID = #{usrId} THEN 'Y'
+            ELSE 'N'
+            end CFM_STS_CD,
+        </if>
+        AP.APNT_NM,
+        AP.APNT_DESC,
+        AP.RECRC_CD,
+        AP.FM_DT,
+        AP.TO_DT,
+        AP.ST_TM,
+        AP.END_TM,
+        AP.MON_FLG,
+        AP.TUE_FLG,
+        AP.WED_FLG,
+        AP.THU_FLG,
+        AP.FRI_FLG,
+        AP.SAT_FLG,
+        AP.SUN_FLG,
+        AP.CRE_USR_ID,
+        (SELECT US.USR_NM FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID
+        ) USR_NM,
+        (SELECT US.IMG_URL FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID
+        ) IMG_URL,
+        TM.APNT_DT
+        FROM ADM_APNT_TM TM,
+        ADM_APNT AP
+        WHERE 1         = 1
+        AND TM.APNT_ID  = AP.APNT_ID
+        AND TM.CO_CD    = #{coCd}
+        <if test="roomId !=  null">
+            AND TM.ROOM_ID  = #{roomId}
+        </if>
+        <if test="apntId !=  null">
+            AND TM.APNT_ID  = #{apntId}
+        </if>
+        <if test="fmDt !=  null">
+            AND TO_NUMBER(TM.APNT_DT)  <![CDATA[ >= ]]> TO_NUMBER(#{fmDt})
+        </if>
+        <if test="toDt !=  null">
+            AND TO_NUMBER(TM.APNT_DT)  <![CDATA[ <= ]]> TO_NUMBER(#{toDt})
+        </if>
+        ORDER BY TO_NUMBER(TM.APNT_DT)
+    </select>
+
+    <select id="searchAppointmentConfirm" resultMap="ResultAppointmentForDay" parameterType="map">
+        /**adm.MeetingAppointmentMapper.searchAppointmentConfirm*/
+        SELECT DISTINCT (AP.APNT_ID),
+        AP.CO_CD,
+        AP.ROOM_ID,
+        (SELECT ROOM_NM FROM ADM_METG_ROOM WHERE ROOM_ID = AP.ROOM_ID) ROOM_NM,
+        AP.APNT_NM,
+        AP.APNT_DESC,
+        AP.RECRC_CD,
+        AP.FM_DT,
+        AP.TO_DT,
+        AP.ST_TM,
+        AP.END_TM,
+        AP.MON_FLG,
+        AP.TUE_FLG,
+        AP.WED_FLG,
+        AP.THU_FLG,
+        AP.FRI_FLG,
+        AP.SAT_FLG,
+        AP.SUN_FLG,
+        AP.CRE_USR_ID,
+        (SELECT US.USR_NM FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID
+        ) USR_NM,
+        (SELECT US.IMG_URL FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID
+        ) IMG_URL
+        FROM ADM_APNT_TM TM,
+        ADM_APNT AP
+        WHERE 1         = 1
+        AND TM.APNT_ID  = AP.APNT_ID
+        AND TM.CO_CD    = #{coCd}
+        AND AP.APNT_ID  = #{apntId}
+        <if test="roomId !=  null">
+            AND TM.ROOM_ID  = #{roomId}
+        </if>
+        <if test="apntDt != null and apntDt != ''">
+            And TM.APNT_DT = #{apntDt}
+        </if>
+    </select>
+
+
+    <insert id="insertAppointment">
+        insert  /** adm.MeetingAppointmentMapper.insert */
+        into ADM_APNT(
+            APNT_ID,
+            CO_CD,
+            ROOM_ID,
+            APNT_NM,
+            APNT_DESC,
+            RECRC_CD,
+            FM_DT,
+            TO_DT,
+            ST_TM,
+            END_TM,
+            SUN_FLG,
+            MON_FLG,
+            TUE_FLG,
+            WED_FLG,
+            THU_FLG,
+            FRI_FLG,
+            SAT_FLG,
+            cre_usr_id, cre_dt, upd_usr_id, upd_dt
+        )
+        values(
+                  #{apntId},
+                  #{coCd},
+                  #{roomId},
+                  #{apntNm},
+                  #{apntDesc},
+                  #{recrcCd},
+                  #{fmDt},
+                  #{toDt},
+                  #{stTm},
+                  #{endTm},
+                  #{sunFlg},
+                  #{monFlg},
+                  #{tueFlg},
+                  #{wedFlg},
+                  #{thuFlg},
+                  #{friFlg},
+                  #{satFlg},
+                  #{createUser}, sysdate, #{updateUser}, sysdate
+              )
+    </insert>
+
+    <insert id="insertAppointmentTime">
+        insert  /** AdmApntTm.insertAppointmentTime */
+        into ADM_APNT_TM(
+            APNT_DT,
+            ROOM_ID,
+            CO_CD,
+            APNT_ID,
+            APNT_TM,
+            cre_usr_id, cre_dt, upd_usr_id, upd_dt
+        )
+        values(
+                  #{apntDt},
+                  #{roomId},
+                  #{coCd},
+                  #{apntId},
+                  #{apntTm},
+                  #{createUser}, sysdate, #{updateUser}, sysdate
+              )
+    </insert>
+
+    <!--Insert Participant-->
+    <insert id="insertParticipant">
+        insert  /** AdmApntUsr.insertParticipant */
+        into ADM_APNT_USR(
+            APNT_ID,
+            USR_ID,
+            cre_usr_id,
+            cre_dt,
+            upd_usr_id,
+            upd_dt
+        )
+        values(
+                  #{apntId},
+                  #{usrId},
+                  #{createUser},
+                  sysdate,
+                  #{updateUser},
+                  sysdate
+              )
+    </insert>
+
+
+    <select id="selectSeqNo" parameterType="map" resultType="java.lang.String" >
+        /** adm.MeetingAppointmentMapper.selectSeqNo */
+        select
+            fc_get_seqno(#{module})
+        from
+            dual
+    </select>
+
+
+    <!--get Appointment Time-->
+    <resultMap id="AdmApntTmMap" type="AdmApntTmVO">
+        <result property="apntId" column="APNT_ID" javaType="String"/>
+        <result property="apntDt" column="APNT_DT" javaType="String"/>
+    </resultMap>
+    <select id="getApntByDateTime" parameterType="hashMap" resultMap="AdmApntTmMap">
+        /** adm.MeetingAppointmentMapper.getApntByDateTime */
+        SELECT
+        DISTINCT(APNT_ID),
+        APNT_DT
+        FROM ADM_APNT_TM
+        WHERE 1      = 1
+        AND ROOM_ID  = #{roomId}
+        AND CO_CD    = #{coCd}
+        AND APNT_DT IN
+        <foreach collection="lstDate" item="item" separator="," close=")" open="(">
+            #{item}
+        </foreach>
+        AND APNT_TM IN
+        <foreach collection="lstApntTm" item="item" separator="," close=")" open="(">
+            #{item.apntTm}
+        </foreach>
+    </select>
+
+    <!--Count Appointment of Current Date-->
+    <select id="countAppointment" parameterType="hashMap" resultType="Integer">
+		/** adm.MeetingAppointmentMapper.countAppointment */
+		SELECT
+			COUNT(*)
+		FROM ADM_APNT_TM
+		WHERE 1      = 1
+		AND APNT_ID  = #{apntId}
+		AND APNT_DT    = #{currentDate}
+	</select>
+
+    <!--Delete Appointment Time-->
+    <delete id="deleteAppointmentTime" parameterType="hashMap">
+        /** adm.MeetingAppointmentMapper.deleteAppointmentTime */
+        delete
+        ADM_APNT_TM
+        where	1 = 1
+        and		ROOM_ID = #{roomId}
+        and		CO_CD = #{coCd}
+        and		APNT_ID = #{apntId}
+        <if test="apntDt != null and apntDt != ''">
+            and 	APNT_DT = #{apntDt}
+        </if>
+    </delete>
+
+    <!--Delete Participant-->
+    <delete id="deleteParticipant" parameterType="hashMap">
+        /** adm.MeetingAppointmentMapper.deleteParticipant */
+        delete
+        ADM_APNT_USR
+        where	1 = 1
+        and		APNT_ID = #{apntId}
+    </delete>
+
+    <!--Update Appointment-->
+    <update id="updateAppointment" parameterType="AdmApntVO">
+        update  /** adm.MeetingAppointmentMapper.update */
+        ADM_APNT set
+        <if test="apntId != null and apntId != ''">
+            APNT_ID = #{apntId},
+        </if>
+        <if test="coCd != null and coCd != ''">
+            CO_CD = #{coCd},
+        </if>
+        <if test="roomId != null and roomId != ''">
+            ROOM_ID = #{roomId},
+        </if>
+        <if test="apntNm != null and apntNm != ''">
+            APNT_NM = #{apntNm},
+        </if>
+        <if test="apntDesc != null and apntDesc != ''">
+            APNT_DESC = #{apntDesc},
+        </if>
+        <if test="recrcCd != null and recrcCd != ''">
+            RECRC_CD = #{recrcCd},
+        </if>
+        <if test="fmDt != null and fmDt != ''">
+            FM_DT = #{fmDt},
+        </if>
+        <if test="toDt != null and toDt != ''">
+            TO_DT = #{toDt},
+        </if>
+        <if test="stTm != null and stTm != ''">
+            ST_TM = #{stTm},
+        </if>
+        <if test="endTm != null and endTm != ''">
+            END_TM = #{endTm},
+        </if>
+        <if test="sunFlg != null and sunFlg != ''">
+            SUN_FLG = #{sunFlg},
+        </if>
+        <if test="monFlg != null and monFlg != ''">
+            MON_FLG = #{monFlg},
+        </if>
+        <if test="tueFlg != null and tueFlg != ''">
+            TUE_FLG = #{tueFlg},
+        </if>
+        <if test="wedFlg != null and wedFlg != ''">
+            WED_FLG = #{wedFlg},
+        </if>
+        <if test="thuFlg != null and thuFlg != ''">
+            THU_FLG = #{thuFlg},
+        </if>
+        <if test="friFlg != null and friFlg != ''">
+            FRI_FLG = #{friFlg},
+        </if>
+        <if test="satFlg != null and satFlg != ''">
+            SAT_FLG = #{satFlg},
+        </if>
+        upd_usr_id = #{updateUser},
+        upd_dt = sysdate
+        where	1 = 1
+        and		APNT_ID = #{apntId}
+        and		CO_CD = #{coCd}
+    </update>
+
+    <!--Delete Appointment-->
+    <delete id="deleteAppointment" parameterType="AdmApntVO">
+		delete  /** adm.MeetingAppointment.delete */
+		ADM_APNT
+		where	1 = 1
+		and		APNT_ID = #{apntId}
+		and		CO_CD = #{coCd}
+		and		ROOM_ID = #{roomId}
+	</delete>
+
+    <!--search Participant-->
+    <resultMap id="AdmApntUsrMap" type="AdmApntUsrVO">
+        <result property="apntId" column="APNT_ID" javaType="String"/>
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="imgUrl" column="IMG_URL" javaType="String"/>
+        <result property="cfmFlg" column="CFM_FLG" javaType="String"/>
+        <result property="usrEml" column="USR_EML" javaType="String"/>
+    </resultMap>
+    <select id="searchParticipant" parameterType="hashMap" resultMap="AdmApntUsrMap">
+        /** adm.MeetingAppointmentMapper.searchParticipant */
+        SELECT ADM_APNT_USR.APNT_ID, ADM_USR.USR_ID, ADM_USR.USR_NM, ADM_USR.IMG_URL, ADM_APNT_USR.CFM_FLG, ADM_USR.USR_EML
+        FROM ADM_USR
+        JOIN ADM_APNT_USR
+        ON ADM_USR.USR_ID = ADM_APNT_USR.USR_ID
+        WHERE 1=1
+        AND ADM_APNT_USR.APNT_ID = #{apntId}
+    </select>
+
+    <!--search email information of  Participant-->
+    <resultMap id="AdmApntUsrMailMap" type="AdmApntUsrVO">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="usrEml" column="USR_EML" javaType="String"/>
+        <result property="comUsrSx" column="COM_USR_SX" javaType="String"/>
+    </resultMap>
+    <select id="getInfoSendMailForParticipant" parameterType="AdmApntUsrVO" resultMap="AdmApntUsrMailMap">
+        /** adm.MeetingAppointmentMapper.getInfoSendMailForParticipant */
+        SELECT ADM_USR.USR_ID, ADM_USR.USR_NM, ADM_USR.USR_EML, ADM_USR.COM_USR_SX
+        FROM ADM_USR
+        WHERE 1=1
+        AND ADM_USR.USR_ID = #{usrId}
+    </select>
+
+    <resultMap type="java.util.HashMap" id="ResultCalendarForWeek">
+        <result property="apntTm" 	column="APNT_TM"/>
+        <result property="sun" 		column="Sun"/>
+        <result property="mon" 		column="Mon"/>
+        <result property="tue" 		column="Tue"/>
+        <result property="wed" 		column="Wed"/>
+        <result property="thu" 		column="Thu"/>
+        <result property="fri" 		column="Fri"/>
+        <result property="sat" 		column="Sat"/>
+    </resultMap>
+    <select id="searchCalendarForWeek" resultMap="ResultCalendarForWeek" parameterType="map">
+        /** adm.sqlMapAppointmentManagement.searchCalendarForWeek */
+        SELECT
+        APNT_TM,
+        MAX(DECODE(APNT_DT, #{mon}, APNT_ID, '')) Mon,
+        MAX(DECODE(APNT_DT, #{tue}, APNT_ID, '')) Tue,
+        MAX(DECODE(APNT_DT, #{wed}, APNT_ID, '')) Wed,
+        MAX(DECODE(APNT_DT, #{thu}, APNT_ID, '')) Thu,
+        MAX(DECODE(APNT_DT, #{fri}, APNT_ID, '')) Fri,
+        MAX(DECODE(APNT_DT, #{sat}, APNT_ID, '')) Sat,
+        MAX(DECODE(APNT_DT, #{sun}, APNT_ID, '')) Sun
+        FROM
+        (SELECT
+        TIW.APNT_DT APNT_DT,
+        TIW.APNT_TM APNT_TM,
+        ADM_APNT_TM.APNT_ID APNT_ID
+        FROM
+        <!-- 		Get empty calendar in week. Start at Monday -->
+        (
+        SELECT
+        TO_CHAR(TO_DATE(#{mon}, 'yyyymmdd') + ((level-1)/(48)) , 'yyyymmdd') APNT_DT,
+        TO_CHAR(TO_DATE(#{mon}, 'yyyymmdd') + ((level-1)/(48)) , 'hh24mi') APNT_TM
+        FROM dual
+        <!-- 		  48 half hours per day * 7 days -->
+        CONNECT BY level <![CDATA[<=]]> (48*7)
+        ) TIW
+        <!-- 	  Join to get Appointment -->
+        LEFT JOIN ADM_APNT_TM
+        ON TIW.APNT_DT          = ADM_APNT_TM.APNT_DT
+        AND TIW.APNT_TM         = ADM_APNT_TM.APNT_TM
+        AND ADM_APNT_TM.CO_CD   = #{coCd}
+        AND ADM_APNT_TM.ROOM_ID = #{roomId}
+        ORDER BY
+        TIW.APNT_DT,
+        TIW.APNT_TM
+        )
+        GROUP BY APNT_TM
+        ORDER BY APNT_TM
+    </select>
+
+    <resultMap id="ResultAppointmentForWeek" type="ApntVO">
+        <result property="apntId" column="APNT_ID"/>
+        <result property="coCd" column="CO_CD"/>
+        <result property="roomId" column="ROOM_ID"/>
+        <result property="roomNm" column="ROOM_NM"/>
+        <result property="apntNm" column="APNT_NM"/>
+        <result property="apntDesc" column="APNT_DESC"/>
+        <result property="recrcCd" column="RECRC_CD"/>
+        <result property="fmDt" column="FM_DT"/>
+        <result property="toDt" column="TO_DT"/>
+        <result property="stTm" column="ST_TM"/>
+        <result property="endTm" column="END_TM"/>
+        <result property="monFlg" column="MON_FLG"/>
+        <result property="tueFlg" column="TUE_FLG"/>
+        <result property="wedFlg" column="WED_FLG"/>
+        <result property="thuFlg" column="THU_FLG"/>
+        <result property="friFlg" column="FRI_FLG"/>
+        <result property="satFlg" column="SAT_FLG"/>
+        <result property="sunFlg" column="SUN_FLG"/>
+        <result property="createUser" column="CRE_USR_ID"/>
+        <result property="usrNm" column="USR_NM"/>
+        <result property="usrEml" column="USR_EML"/>
+        <result property="usrSkyId" column="USR_SKY_ID"/>
+        <result property="mgrId" column="MGR_ID"/>
+        <result property="mgrNm" column="MGR_NM"/>
+        <result property="mgrSkyId" column="MGR_SKY_ID"/>
+        <result property="teamNm" column="TEAM_NM"/>
+    </resultMap>
+    <select id="searchAppointmentForWeek" parameterType="hashMap" resultMap="ResultAppointmentForWeek">
+        /** adm.sqlMapAppointmentManagement.searchAppointmentForWeek */
+        SELECT DISTINCT (AP.APNT_ID),
+        AP.CO_CD,
+        AP.ROOM_ID,
+        (SELECT ROOM_NM FROM ADM_METG_ROOM WHERE ROOM_ID = AP.ROOM_ID) ROOM_NM,
+        AP.APNT_NM,
+        AP.APNT_DESC,
+        AP.RECRC_CD,
+        AP.FM_DT,
+        AP.TO_DT,
+        AP.ST_TM,
+        AP.END_TM,
+        AP.MON_FLG,
+        AP.TUE_FLG,
+        AP.WED_FLG,
+        AP.THU_FLG,
+        AP.FRI_FLG,
+        AP.SAT_FLG,
+        AP.SUN_FLG,
+        AP.CRE_USR_ID,
+        (SELECT US.USR_NM FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID) USR_NM,
+        (SELECT US.USR_EML FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID) USR_EML,
+        (SELECT US.SKY_ID FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID) USR_SKY_ID,
+        AT.TEAM_MGR_ID MGR_ID,
+        (SELECT USR_NM FROM ADM_USR WHERE USR_ID = AT.TEAM_MGR_ID) MGR_NM,
+        (SELECT SKY_ID FROM ADM_USR WHERE USR_ID = AT.TEAM_MGR_ID) MGR_SKY_ID,
+        AT.TEAM_NM
+        FROM ADM_APNT_TM TM,
+        ADM_APNT AP,
+        ADM_TEAM AT
+        WHERE 1         = 1
+        AND TM.APNT_ID  = AP.APNT_ID
+        AND TM.CO_CD    = #{coCd}
+        <if test="roomId != null and roomId != ''">
+            AND TM.ROOM_ID  = #{roomId}
+        </if>
+        AND TM.apnt_dt IN
+        <foreach collection="lstDate" item="item" separator="," close=")" open="(">
+            #{item}
+        </foreach>
+        AND AT.CO_CD = #{coCd}
+        AND TEAM_ID = (SELECT TEAM_ID FROM ADM_TEAM_USR ATU WHERE ATU.USR_ID = AP.CRE_USR_ID AND ATU.APRO_OWNR_FLG = 'Y')
+        AND AT.DELT_STS_FLG = 'N'
+    </select>
+
+    <select id="searchMeetingRoomByRoomId" parameterType="hashMap" resultMap="AdmMetgRoomMap">
+		/** adm.sqlMapAppointmentManagement.searchMeetingRoomByRoomId */
+		SELECT CO_CD ,
+		  ROOM_ID ,
+		  ROOM_NM ,
+		  ROOM_DESC ,
+		  ORD_NO ,
+		  DELT_FLG
+		FROM ADM_METG_ROOM
+		WHERE CO_CD = #{coCd}
+		AND ROOM_ID = #{roomId}
+		AND DELT_FLG = 'N'
+		ORDER BY ORD_NO
+	</select>
+
+    <resultMap type="UiFileRgstVO" id="searchFileMap">
+        <result property="atchNo" column="ATCH_NO" javaType="String"/>
+        <result property="fileNm" column="FILE_NM" javaType="String"/>
+        <result property="fileTpCd" column="FILE_TP_CD" javaType="String"/>
+        <result property="fileLocUrl" column="FILE_LOC_URL" javaType="String"/>
+        <result property="fileSzNo" column="FILE_SZ_NO" javaType="String"/>
+        <result property="czAtchNo" column="CZ_ATCH_NO" javaType="String"/>
+    </resultMap>
+
+    <select id="searchAtchNoFromCzAtchNo" resultMap="searchFileMap" parameterType="UiFileRgstVO">
+        /** adm.sqlMapAppointmentManagement.searchAtchNoFromCzAtchNo */
+        SELECT
+        ADM_CZ_ATCH.ATCH_NO
+        FROM ADM_CZ_ATCH
+        WHERE 1                    = 1
+        AND ADM_CZ_ATCH.ATCH_TP_CD = #{atchTpCd}
+        AND ADM_CZ_ATCH.CZ_ATCH_NO = #{czAtchNo}
+        ORDER BY ADM_CZ_ATCH.ATCH_NO
+    </select>
+
+    <select id="searchAttachUrlByMeeting" resultType="String" parameterType="UiFileRgstVO">
+        /** adm.sqlMapAppointmentManagement.searchAttachUrlByMeeting */
+        SELECT CONCAT(FILE_LOC_URL, CONCAT('/', FILE_NM))
+        FROM ADM_ATCH
+        WHERE 1 = 1
+        AND ATCH_NO IN (SELECT ATCH_NO FROM ADM_CZ_ATCH WHERE 1 = 1 AND CZ_ATCH_NO = #{czAtchNo} AND ATCH_TP_CD = #{atchTpCd})
+    </select>
+
+    <!--Search calendar of the user-->
+    <select id="searchMyCalendar" resultMap="ResultAppointmentForDay" parameterType="map">
+        /**adm.MeetingAppointmentMapper.searchMyCalendar*/
+        SELECT AAA.*,
+        CASE
+        WHEN (SELECT COUNT(*)
+        FROM ADM_APNT_USR
+        WHERE 1     = 1
+        AND USR_ID  = #{usrId}
+        AND APNT_ID = AAA.APNT_ID) > 0
+        THEN 'Y'
+        WHEN AAA.CRE_USR_ID = #{usrId}
+        THEN 'Y'
+        ELSE 'N'
+        END IS_PART,
+        CASE
+        WHEN AAA.CRE_USR_ID = #{usrId}
+        THEN 'Y'
+        WHEN (SELECT COUNT(*)
+        FROM ADM_APNT_USR
+        WHERE 1     = 1
+        AND USR_ID  = #{usrId}
+        AND APNT_ID = AAA.APNT_ID) > 0
+        THEN
+        (SELECT CFM_STS_CD
+        FROM ADM_APNT_USR_CFM
+        WHERE 1     = 1
+        AND APNT_ID = AAA.APNT_ID
+        AND APNT_DT = AAA.APNT_DT
+        AND USR_ID  = #{usrId}
+        )
+        ELSE 'N'
+        END CFM_STS_CD
+        FROM
+        (SELECT DISTINCT (AP.APNT_ID),
+        AP.CRE_USR_ID AS USR_ID,
+        AP.CO_CD,
+        AP.ROOM_ID,
+        (SELECT ROOM_NM FROM ADM_METG_ROOM WHERE ROOM_ID = AP.ROOM_ID) ROOM_NM,
+        AP.APNT_NM,
+        AP.APNT_DESC,
+        AP.RECRC_CD,
+        AP.FM_DT,
+        AP.TO_DT,
+        AP.ST_TM,
+        AP.END_TM,
+        AP.MON_FLG,
+        AP.TUE_FLG,
+        AP.WED_FLG,
+        AP.THU_FLG,
+        AP.FRI_FLG,
+        AP.SAT_FLG,
+        AP.SUN_FLG,
+        AP.CRE_USR_ID,
+        (SELECT US.USR_NM FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID) USR_NM,
+        (SELECT US.IMG_URL FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID) IMG_URL,
+        TM.APNT_DT
+        FROM ADM_APNT_TM TM,
+        ADM_APNT AP
+        WHERE 1         = 1
+        AND TM.APNT_ID  = AP.APNT_ID
+        AND AP.CRE_USR_ID IN
+        <foreach open="(" separator="," close=")" collection="lstParticipant" item="item" index="index">
+            #{item}
+        </foreach>
+        AND TO_NUMBER(TM.APNT_DT) <![CDATA[ >= ]]> TO_NUMBER(#{fmDt})
+        AND TO_NUMBER(TM.APNT_DT) <![CDATA[ <= ]]> TO_NUMBER(#{toDt})
+        <if test="lstParticipant != null and lstParticipant.size() &gt; 0">
+            UNION
+            SELECT DISTINCT (AP.APNT_ID),
+            AAA.USR_ID,
+            AP.CO_CD,
+            AP.ROOM_ID,
+            (SELECT ROOM_NM FROM ADM_METG_ROOM WHERE ROOM_ID = AP.ROOM_ID
+            ) ROOM_NM,
+            AP.APNT_NM,
+            AP.APNT_DESC,
+            AP.RECRC_CD,
+            AP.FM_DT,
+            AP.TO_DT,
+            AP.ST_TM,
+            AP.END_TM,
+            AP.MON_FLG,
+            AP.TUE_FLG,
+            AP.WED_FLG,
+            AP.THU_FLG,
+            AP.FRI_FLG,
+            AP.SAT_FLG,
+            AP.SUN_FLG,
+            AP.CRE_USR_ID,
+            (SELECT US.USR_NM FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID) USR_NM,
+            (SELECT US.IMG_URL FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID) IMG_URL,
+            TM.APNT_DT
+            FROM
+            ADM_APNT AP,
+            (SELECT ADM_APNT_USR.APNT_ID, ADM_APNT_USR.USR_ID
+            FROM ADM_APNT_USR
+            WHERE 1 =1
+            AND ADM_APNT_USR.USR_ID IN
+            <foreach open="(" separator="," close=")" collection="lstParticipant" item="item" index="index">
+                #{item}
+            </foreach>
+            )AAA,
+            ADM_APNT_TM TM
+            WHERE
+            1 = 1
+            AND TM.APNT_ID             = AP.APNT_ID
+            AND AP.APNT_ID = AAA.APNT_ID
+            AND TO_NUMBER(TM.APNT_DT) <![CDATA[ >= ]]> TO_NUMBER(#{fmDt})
+            AND TO_NUMBER(TM.APNT_DT) <![CDATA[ <= ]]> TO_NUMBER(#{toDt})
+        </if>
+        )AAA
+        ORDER BY
+        TO_NUMBER(APNT_DT)
+    </select>
+
+    <resultMap id="AdmVacMap" type="AdmVacVO">
+        <result property="coCd"    column="CO_CD"     javaType="String"/>
+        <result property="vacId"   column="VAC_ID"    javaType="String"/>
+        <result property="vacDt"   column="VAC_DT"    javaType="String"/>
+        <result property="vacDesc" column="VAC_DESC"  javaType="String"/>
+        <result property="vacTpCd" column="VAC_TP_CD" javaType="String"/>
+        <result property="teamId"  column="TEAM_ID"   javaType="String"/>
+    </resultMap>
+
+    <select id="searchHoliday" parameterType="hashMap" resultMap="AdmVacMap">
+        select *
+        from (
+            select 	/** MeetingAppointmentMapper.searchHoliday */
+				CO_CD,
+				VAC_ID,
+				CONCAT(#{year}, VAC_DT) VAC_DT,
+				VAC_DESC,
+				VAC_TP_CD,
+				TEAM_ID
+            from	ADM_VAC
+		    where	CO_CD = #{coCd}
+		    AND 	VAC_TP_CD = 'ADM_VAC_TPANL'
+		    AND 	DELT_FLG = 'N'
+		    UNION ALL
+		    SELECT CO_CD,
+				VAC_ID,
+				VAC_DT,
+				VAC_DESC,
+				VAC_TP_CD,
+				TEAM_ID
+		    FROM	ADM_VAC
+		    WHERE	CO_CD = #{coCd}
+		    AND 	VAC_DT like '${year}%'
+		    AND 	DELT_FLG = 'N'
+        )
+	    WHERE 1 = 1
+		AND TO_NUMBER(VAC_DT)  <![CDATA[ >= ]]> TO_NUMBER(#{fmDt})
+        AND TO_NUMBER(VAC_DT)  <![CDATA[ <= ]]> TO_NUMBER(#{toDt})
+        ORDER BY TO_NUMBER(VAC_DT)
+	</select>
+
+    <!--search Participant Confirm-->
+    <resultMap id="AdmApntUsrCfmMap" type="java.util.HashMap">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="apntId" column="APNT_ID" javaType="String"/>
+        <result property="apntDt" column="APNT_DT" javaType="String"/>
+        <result property="cfmStsCd" column="CFM_STS_CD" javaType="String"/>
+    </resultMap>
+    <select id="searchParticipantCfmByDt" parameterType="hashMap" resultMap="AdmApntUsrCfmMap">
+        /** adm.MeetingAppointmentMapper.searchParticipantCfmByDt */
+        SELECT USR_ID, APNT_ID, APNT_DT, CFM_STS_CD
+        FROM ADM_APNT_USR_CFM
+        WHERE 1=1
+        AND APNT_ID = #{apntId}
+        AND APNT_DT = #{apntDt}
+    </select>
+
+    <select id="searchCfmByDtAndUsrId" parameterType="hashMap" resultMap="AdmApntUsrCfmMap">
+        /** adm.MeetingAppointmentMapper.searchCfmByDtAndUsrId */
+        SELECT DISTINCT(TM.APNT_DT),
+        (SELECT CFM_STS_CD FROM ADM_APNT_USR_CFM WHERE 1 = 1 AND APNT_ID = #{apntId} AND APNT_DT =  TM.APNT_DT AND USR_ID = #{usrId})CFM_STS_CD
+        FROM ADM_APNT_TM TM
+        WHERE 1 = 1 
+        AND TM.APNT_ID = #{apntId}
+        AND TO_NUMBER(TM.APNT_DT) >= TO_NUMBER(#{apntDt})
+        ORDER BY TO_NUMBER(TM.APNT_DT)
+    </select>
+
+    <select id="countDtAppointment" parameterType="hashMap" resultType="Integer">
+        SELECT COUNT(*) FROM ADM_APNT_TM WHERE 1 = 1 AND APNT_DT = #{apntDt} AND APNT_ID = #{apntId}
+    </select>
+
+    <!--Insert Confirm of Participant-->
+    <insert id="insertCfmStsCd" parameterType="hashMap">
+        INSERT  /** adm.MeetingAppointmentMapper.insert */
+        INTO ADM_APNT_USR_CFM(
+        USR_ID,
+        APNT_ID,
+        APNT_DT,
+        CFM_STS_CD,
+        CRE_USR_ID, CRE_DT, UPD_USR_ID, UPD_DT
+        )
+        VALUES(
+        #{usrId},
+        #{apntId},
+        #{apntDt},
+        #{cfmStsCd},
+        #{usrId}, sysdate, #{usrId}, sysdate
+        )
+    </insert>
+
+    <!--Update Confirm of Participant-->
+    <update id="updateCfmStsCd" parameterType="hashMap">
+        UPDATE  /** adm.MeetingAppointmentMapper.updateCfmStsCd */
+        ADM_APNT_USR_CFM set
+        CFM_STS_CD = #{cfmStsCd},
+        upd_usr_id = #{usrId},
+        upd_dt = sysdate
+        WHERE	1 = 1
+        AND		USR_ID = #{usrId}
+        AND		APNT_ID = #{apntId}
+        AND		APNT_DT = #{apntDt}
+    </update>
+
+    <!--Delete Confirm of Participant-->
+    <delete id="deleteCfmStsCd" parameterType="hashMap">
+        /** adm.MeetingAppointmentMapper.deleteCfmStsCd */
+        DELETE
+        ADM_APNT_USR_CFM
+        WHERE 	1 = 1
+        AND		APNT_ID = #{apntId}
+        <if test="apntDt != null and apntDt != ''">
+            AND		APNT_DT = #{apntDt}
+        </if>
+    </delete>
+
+    <!--search Participant Confirm-->
+    <resultMap id="admDtOfAppointment" type="java.util.HashMap">
+        <result property="apntId" column="APNT_ID" javaType="String"/>
+        <result property="apntDt" column="APNT_DT" javaType="String"/>
+    </resultMap>
+
+    <select id="searchDtOfAppointment" parameterType="hashMap" resultMap="admDtOfAppointment">
+        SELECT DISTINCT (APNT_DT)
+        FROM ADM_APNT_TM
+        WHERE 1 = 1
+        AND APNT_ID = #{apntId}
+        AND CO_CD = #{coCd}
+        AND ROOM_ID = #{roomId}
+        ORDER BY TO_NUMBER(APNT_DT)
+    </select>
+
+    <select id="searchFloorByCompany" resultType="String">
+        /** adm.sqlMapAppointmentManagement.searchFloorByCompany */
+        SELECT DISTINCT (FLR_NM)
+        FROM ADM_METG_ROOM
+        WHERE 1=1
+          AND DELT_FLG = 'N'
+          AND CO_CD = #{coCd}
+    </select>
+
+    <resultMap id="freeTimeUsersByDay" type="MeetingFreeTimeDayResponse">
+        <result property="startTime" column="ST_TM" />
+        <result property="endTime" column="END_TM" />
+        <result property="usrId" column="USR_ID" />
+    </resultMap>
+
+    <select id="selectFreeTimeUserByDay" resultMap="freeTimeUsersByDay">
+        /** MeetingAppointmentMapper.selectFreeTimeUserByDay*/
+        SELECT P.*
+        FROM
+        (
+        SELECT DISTINCT (AP.APNT_ID), AP.CRE_USR_ID AS USR_ID, AP.ST_TM, AP.END_TM
+        FROM ADM_APNT_TM TM, ADM_APNT AP
+        WHERE 1 = 1
+        AND TM.APNT_ID = AP.APNT_ID
+        <if test="userIds != null and userIds.size() &gt; 0">
+            <trim prefix="AND AP.CRE_USR_ID in ">
+                <foreach item="item" index="index" collection="userIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </trim>
+        </if>
+        AND TM.APNT_DT = #{date}
+        UNION
+
+        SELECT DISTINCT (AP.APNT_ID), AAA.USR_ID, AP.ST_TM, AP.END_TM
+        FROM ADM_APNT AP,
+        (SELECT ADM_APNT_USR.APNT_ID, ADM_APNT_USR.USR_ID
+        FROM ADM_APNT_USR
+        WHERE 1 =1
+        <if test="userIds != null and userIds.size() &gt; 0">
+            <trim prefix="AND ADM_APNT_USR.USR_ID in ">
+                <foreach item="item" index="index" collection="userIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </trim>
+        </if>) AAA, ADM_APNT_TM TM
+        WHERE 1 = 1
+        AND TM.APNT_ID = AP.APNT_ID
+        AND AP.APNT_ID = AAA.APNT_ID
+        AND TM.APNT_DT = #{date}
+        ) P
+    </select>
+
+    <resultMap id="freeTimeUsersByWeek" type="MeetingFreeTimeDayResponse">
+        <result property="startTime" column="ST_TM" />
+        <result property="endTime" column="END_TM" />
+        <result property="date" column="APNT_DT" />
+        <result property="usrId" column="USR_ID" />
+        <result property="imgUrl" column="IMG_URL" />
+    </resultMap>
+
+    <select id="selectFreeTimeUserByWeek" resultMap="freeTimeUsersByWeek">
+        /** MeetingAppointmentMapper.selectFreeTimeUserByWeek*/
+        SELECT P.*
+        FROM
+        (
+        SELECT DISTINCT (AP.APNT_ID), AP.CRE_USR_ID AS USR_ID, AP.ST_TM, AP.END_TM, (SELECT US.IMG_URL FROM ADM_USR US WHERE US.USR_ID = AP.CRE_USR_ID) IMG_URL, TM.APNT_DT
+        FROM ADM_APNT_TM TM, ADM_APNT AP
+        WHERE 1 = 1
+        AND TM.APNT_ID = AP.APNT_ID
+        <if test="userIds != null and userIds.size() &gt; 0">
+            <trim prefix="AND AP.CRE_USR_ID in ">
+                <foreach item="item" index="index" collection="userIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </trim>
+        </if>
+        AND (TO_DATE(TM.APNT_DT, 'yyyyMMdd') BETWEEN TO_DATE(#{fromDate}, 'yyyyMMdd') AND TO_DATE(#{toDate}, 'yyyyMMdd'))
+        UNION
+
+        SELECT DISTINCT (AP.APNT_ID), AAA.USR_ID, AP.ST_TM, AP.END_TM, (SELECT US.IMG_URL FROM ADM_USR US WHERE US.USR_ID = AAA.USR_ID) IMG_URL, TM.APNT_DT
+        FROM ADM_APNT AP,
+        (SELECT ADM_APNT_USR.APNT_ID, ADM_APNT_USR.USR_ID
+        FROM ADM_APNT_USR
+        WHERE 1 =1
+        <if test="userIds != null and userIds.size() &gt; 0">
+            <trim prefix="AND ADM_APNT_USR.USR_ID in ">
+                <foreach item="item" index="index" collection="userIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </trim>
+        </if>) AAA, ADM_APNT_TM TM
+        WHERE 1 = 1
+        AND TM.APNT_ID = AP.APNT_ID
+        AND AP.APNT_ID = AAA.APNT_ID
+        AND (TO_DATE(TM.APNT_DT, 'yyyyMMdd') BETWEEN TO_DATE(#{fromDate}, 'yyyyMMdd') AND TO_DATE(#{toDate}, 'yyyyMMdd'))
+        ) P
+    </select>
+
+    <resultMap id="AdmOfficeMap" type="AdmOfficeVo">
+        <result property="ofcCd" column="OFC_CD" />
+        <result property="coCd" column="CO_CD" />
+        <result property="ofcNm" column="OFC_NM" />
+        <result property="actFlg" column="ACT_FLG" />
+        <result property="bkgFlg" column="BKG_FLG" />
+        <result property="ofcShrtNm" column="OFC_SHRT_NM"/>
+    </resultMap>
+
+    <select id="searchOfficesBooking" resultMap="AdmOfficeMap">
+        /** OfficeMapper.selectOffices */
+        SELECT
+            OFC_CD, OFC_NM, ACT_FLG, BKG_FLG, CO_CD, cre_usr_id, upd_usr_id, cre_dt, upd_dt, OFC_SHRT_NM
+        FROM ADM_OFC
+        WHERE CO_CD = #{coCd}
+          AND ACT_FLG = 'Y'
+          AND BKG_FLG = 'Y'
+        ORDER BY OFC_NM
+    </select>
+
+    <resultMap id="AdmMetgRoomMapByOffice" type="AdmMetgRoomVO">
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="roomId" column="ROOM_ID" javaType="String"/>
+        <result property="roomNm" column="ROOM_NM" javaType="String"/>
+        <result property="deltFlg" column="DELT_FLG" javaType="String"/>
+        <result property="ordNo" column="ORD_NO" javaType="Integer"/>
+        <result property="roomDesc" column="ROOM_DESC" javaType="String"/>
+        <result property="createUser" column="CRE_USR_ID" javaType="String"/>
+    </resultMap>
+
+    <select id="searchMeetingRoomByOffice" resultMap="AdmMetgRoomMapByOffice">
+        /**adm.MeetingAppointmentMapper.searchMeetingRoomByOffice*/
+        select
+            CO_CD,
+            ROOM_ID,
+            ROOM_NM,
+            DELT_FLG,
+            ORD_NO,
+            ROOM_DESC,
+            CRE_USR_ID
+        from ADM_METG_ROOM
+        where 1=1
+          AND DELT_FLG = 'N'
+          AND OFC_CD = #{ofcCd}
+        ORDER BY ORD_NO
+    </select>
+
+</mapper>

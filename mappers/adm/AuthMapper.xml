@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.AuthMapper">
+
+
+    <resultMap id="ListMenuResultMap" type="AdmMnuPgmVO">
+        <result property="mnuPgmId" column="MNU_PGM_ID" javaType="String"/>
+        <result property="prntId" column="PRNT_MNU_ID" javaType="String"/>
+        <result property="mnuPgmNm" column="MNU_PGM_NM" javaType="String"/>
+        <result property="mnuPgmUrl" column="MNU_PGM_URL_HTML" javaType="String"/>
+        <result property="mnuIco" column="MNU_ICON" javaType="String"/>
+        <result property="mnuPgmOrdNo" column="MNU_PGM_ORD_NO" javaType="Integer"/>
+        <result column="level" property="level"></result>
+    </resultMap>
+
+
+    <select id="findAllUser" resultMap="UserMap">
+        select *
+        from adm_usr
+    </select>
+    <resultMap id="UserMap" type="AdmUsrVo">
+        <result column="usr_id" property="usrId"></result>
+        <result column="usr_nm" property="usrNm"></result>
+        <result column="usr_eml" property="usrEml"></result>
+        <result column="usr_pwd" property="usrPwd"></result>
+        <result column="CNT_CD" property="cntCd"></result>
+        <result column="CO_CD" property="coCd"></result>
+        <result column="IMG_URL" property="imgUrl"></result>
+    </resultMap>
+
+    <resultMap id="UserMapLoginMap" type="com.clv.sso.shared.models.UserInfoVO">
+        <result column="usr_id" property="usrId"/>
+        <result column="usr_pwd" property="usrPwd"/>
+    </resultMap>
+    <select id="login" resultMap="UserMapLoginMap" parameterType="String">
+        select usr.usr_id,
+               CRYPTIT.DECRYPT(usr.USR_PWD, 'SPI') usr_pwd
+        from adm_usr usr
+        where usr.usr_id = #{userName}
+          and usr.DELT_STS_FLG <![CDATA[<>]]> 'Y'
+          and usr.ACT_FLG <![CDATA[<>]]> 'N'
+          and ROWNUM = 1
+
+    </select>
+
+
+    <select id="getMenuListAuthority" resultMap="ListMenuResultMap" parameterType="map">
+        /** adm.getMenuListAuthority */
+        SELECT
+        level,
+        MNU_PGM_ID,
+        MNU_PGM_NM,
+        PRNT_MNU_ID,
+        MNU_PGM_URL_HTML,
+        MNU_PGM_ORD_NO,
+        MNU_ICON
+        from (
+        <if test="usrId != 'admin' ">
+            SELECT DISTINCT
+            C.MNU_PGM_ID,
+            C.MNU_PGM_NM,
+            C.PRNT_MNU_ID,
+            C.MNU_PGM_URL_HTML,
+            C.MNU_PGM_ORD_NO,
+            C.MNU_ICON
+            FROM ADM_ROLE_PGM_AUTH A,
+            ADM_MNU_PGM C
+            WHERE A.ROLE_ID IN
+            (
+            SELECT ROLE_ID
+            FROM
+            (
+            SELECT DISTINCT ADM_ROLE.ROLE_ID
+            FROM ADM_USR_ROLE ,
+            ADM_ROLE
+            WHERE 1 = 1
+            AND ADM_USR_ROLE.ROLE_ID = ADM_ROLE.ROLE_ID
+            AND ADM_USR_ROLE.USR_ID = #{usrId}
+            UNION
+            SELECT DISTINCT ROLE_ID
+            FROM ADM_PJT_USR USR,
+            ADM_PJT PJT
+            WHERE 1 = 1
+            AND USR.PJT_ID = PJT.PJT_ID
+            AND PJT.USE_FLG = 'Y'
+            AND USR.USR_ID = #{usrId}
+            )
+            )
+            AND A.MNU_PGM_ID = C.MNU_PGM_ID
+            AND MNU_USD ='Y'
+            AND DELT_STS_FLG ='N'
+            AND POPUP_FLG ='N'
+            AND C.PJT_ID = 'PJT20120711000000001'
+        </if>
+        <!-- this is a master user -->
+        <if test="usrId == 'admin' ">
+            SELECT DISTINCT
+            MNU_PGM_ID,
+            MNU_PGM_NM,
+            PRNT_MNU_ID,
+            MNU_PGM_URL_HTML,
+            MNU_PGM_ORD_NO,
+            MNU_ICON
+            FROM ADM_MNU_PGM
+            WHERE MNU_USD = 'Y'
+            AND POPUP_FLG ='N'
+            AND DELT_STS_FLG = 'N'
+            AND POPUP_FLG ='N'
+            AND PJT_ID = 'PJT20120711000000001'
+        </if>
+        )
+        start with PRNT_MNU_ID = '0'
+        connect by prior MNU_PGM_ID = PRNT_MNU_ID
+        order SIBLINGS by MNU_PGM_ORD_NO, MNU_PGM_NM ASC
+    </select>
+
+    <resultMap type="AdmRoleVO" id="UsrRoleMap">
+        <result property="roleId" column="ROLE_ID" javaType="String"/>
+        <result property="prntRoleId" column="PRNT_ROLE_ID" javaType="String"/>
+        <result property="roleNm" column="ROLE_NM" javaType="String"/>
+        <result property="roleDesc" column="ROLE_DESC" javaType="String"/>
+        <result property="roleTpCd" column="ROLE_TP_CD" javaType="String"/>
+        <result property="isHardRole" column="IS_HARD_ROLE" javaType="String"/>
+        <result property="ordNo" column="ORD_NO" javaType="String"/>
+        <result property="uqflg" column="UQ_FLG" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+    </resultMap>
+    <select id="selectUsrRoleByRoleTpCd" resultMap="UsrRoleMap" parameterType="hashMap">
+        select /** cas.RoleAuthorityManagement.selectUsrRoleByRoleTpCd */
+        ROLE_ID,
+        PRNT_ROLE_ID,
+        ROLE_NM,
+        ROLE_DESC,
+        ROLE_TP_CD,
+        IS_HARD_ROLE,
+        NVL(ORD_NO, '0') ORD_NO,
+        UQ_FLG,
+        CO_CD
+        from ADM_ROLE
+        where 1 = 1
+        <if test="roleTpCd != null ">
+            AND ROLE_TP_CD = #{roleTpCd}
+        </if>
+        <if test="coCd != null">
+            AND CO_CD = #{coCd}
+        </if>
+        <if test="mgmtRoleId != null">
+            AND ROLE_ID <![CDATA[<>]]> #{mgmtRoleId}
+        </if>
+        <if test="uqflg != null">
+            AND UQ_FLG = #{uqflg}
+        </if>
+        <if test="usrId != null">
+            AND (PRNT_ROLE_ID in (SELECT DISTINCT ROLE_ID FROM ADM_PJT_USR WHERE USR_ID = #{usrId}
+            UNION SELECT DISTINCT ROLE_ID FROM ADM_USR_ROLE WHERE USR_ID = #{usrId})
+            OR
+            ROLE_ID in (SELECT DISTINCT ROLE_ID FROM ADM_PJT_USR WHERE USR_ID = #{usrId}
+            UNION SELECT DISTINCT ROLE_ID FROM ADM_USR_ROLE WHERE USR_ID = #{usrId}))
+        </if>
+        <if test="roleId != null">
+            START WITH ROLE_ID = #{roleId}
+            CONNECT BY PRIOR ROLE_ID = PRNT_ROLE_ID
+        </if>
+        order by ORD_NO asc, ROLE_NM asc
+    </select>
+
+    <select id="getRolesbyPjtIdAndUsrId" resultMap="UsrRoleMap" parameterType="hashMap">
+        select /** AuthMapper.getRolesbyPjtIdAndUsrId */
+        apu.ROLE_ID,
+        rle.ROLE_NM
+        from adm_pjt_usr apu, adm_role rle
+        where 1 = 1
+        and apu.role_id = rle.role_id
+        <if test="usrId != null">
+            AND apu.usr_id = #{usrId}
+        </if>
+        <if test="pjtId != null">
+            AND apu.pjt_id = #{pjtId}
+        </if>
+    </select>
+
+    <select id="selectListRoleType" resultType="String" parameterType="hashMap">
+        select /**[SQLID:mcm.Login.selectListRoleType]*/
+            ROLE_ID
+        from (
+                 select distinct ADM_ROLE.ROLE_ID
+                 from ADM_USR_ROLE,
+                      ADM_ROLE
+                 where 1 = 1
+                   and ADM_USR_ROLE.ROLE_ID = ADM_ROLE.ROLE_ID
+                   and ADM_USR_ROLE.USR_ID = #{usrId}
+                 union
+                 select distinct ROLE_ID
+                 from ADM_PJT_USR USR,
+                      ADM_PJT PJT
+                 where 1 = 1
+                   and USR.PJT_ID = PJT.PJT_ID
+                   and PJT.USE_FLG = 'Y'
+                   and USR.USR_ID = #{usrId}
+             )
+    </select>
+    <select id="selectCountMenuListAuthorityByUsrId" resultType="Integer" parameterType="hashMap">
+        /** AuthMapper.selectCountMenuListAuthorityByUsrId */
+        SELECT COUNT(MNU_PGM_ID)
+        from (
+                 SELECT DISTINCT C.MNU_PGM_ID,
+                                 C.MNU_PGM_NM,
+                                 C.PRNT_MNU_ID,
+                                 C.MNU_PGM_URL_HTML,
+                                 C.MNU_PGM_ORD_NO,
+                                 C.MNU_ICON
+                 FROM ADM_ROLE_PGM_AUTH A,
+                      ADM_MNU_PGM C
+                 WHERE A.ROLE_ID IN
+                       (
+                           SELECT ROLE_ID
+                           FROM (
+                                    SELECT DISTINCT ADM_ROLE.ROLE_ID
+                                    FROM ADM_USR_ROLE,
+                                         ADM_ROLE
+                                    WHERE 1 = 1
+                                      AND ADM_USR_ROLE.ROLE_ID = ADM_ROLE.ROLE_ID
+                                      AND ADM_USR_ROLE.USR_ID = #{usrId}
+                                    UNION
+                                    SELECT DISTINCT ROLE_ID
+                                    FROM ADM_PJT_USR USR,
+                                         ADM_PJT PJT
+                                    WHERE 1 = 1
+                                      AND USR.PJT_ID = PJT.PJT_ID
+                                      AND PJT.USE_FLG = 'Y'
+                                      AND USR.USR_ID = #{usrId}
+                                )
+                       )
+                   AND A.MNU_PGM_ID = C.MNU_PGM_ID
+                   AND C.MNU_PGM_URL_HTML = #{mnuPgmId}
+                   AND MNU_USD = 'Y'
+                   AND DELT_STS_FLG = 'N'
+                   AND POPUP_FLG = 'N')
+    </select>
+
+    <select id="selectLoginPassword" resultType="String">
+        SELECT CryptIT.decrypt(USR_PWD, 'SPI') AS USR_PWD
+        FROM ADM_USR
+        WHERE 1 = 1
+          AND USR_ID = #{usrId}
+    </select>
+
+
+    <resultMap type="com.clv.sso.shared.models.UserInfoVO" id="selectUserInfoMap">
+        <result column="usr_id" property="usrId"></result>
+        <result column="usr_nm" property="usrNm"></result>
+        <result column="usr_eml" property="usrEml"></result>
+        <result column="empe_tp_cd" property="empeTpCd"></result>
+        <result column="usr_pwd" property="usrPwd"></result>
+        <result column="CNT_CD" property="cntCd"></result>
+        <result column="CO_CD" property="coCd"></result>
+        <result column="IMG_URL" property="imgUrl"></result>
+        <result column="team_id" property="orzId"></result>
+        <result column="team_nm" property="orzNm"></result>
+        <result column="com_usr_sx" property="comUsrSx"></result>
+        <result column="ZN_NM" property="znNm" ></result>
+        <result column="EMPE_ST_DT" property="strStartDt" ></result>
+    </resultMap>
+    <select id="selectUserInfo" resultMap="selectUserInfoMap">
+        select /**[SQLID:mcm.Login.selectUserInfo]*/
+            USR.USR_ID,
+            USR.USR_NM,
+            USR.COM_USR_SX,
+            USR.CNT_CD,
+            USR.USR_EML,
+            USR.IMG_URL,
+            USR.CO_CD,
+            USR.EMPE_NO,
+            TO_CHAR(NVL(USR.EMPE_ST_DT,sysdate),'MM/dd/yyyy') EMPE_ST_DT,
+            USR.EMPE_TP_CD,
+            nvl( (
+                SELECT DISTINCT
+                    loc.ZN_NM
+                FROM
+                    adm_loc loc
+                WHERE
+                    loc.loc_cd = usr.loc_cd
+            ),'Asia/Ho_Chi_Minh') ZN_NM,
+            nvl((
+                    SELECT t_usr.team_id
+                    FROM adm_team_usr t_usr
+                    WHERE t_usr.usr_id = usr.usr_id
+                      AND APRO_OWNR_FLG = 'Y'
+                ), '') team_id,
+            nvl((
+                    SELECT team.team_nm
+                    FROM adm_team team,
+                         adm_team_usr t_usr
+                    WHERE t_usr.usr_id = usr.usr_id
+                      AND t_usr.team_id = team.team_id
+                      AND apro_ownr_flg = 'Y'
+                ), '') team_nm
+        from ADM_USR USR
+        where 1 = 1
+          AND USR.USR_ID = #{usrId}
+          AND USR.DELT_STS_FLG <![CDATA[<>]]> 'Y'
+          AND USR.ACT_FLG <![CDATA[<>]]> 'N'
+          AND rownum = 1
+    </select>
+
+    <select id="searchDecryption" resultType="String" parameterType="String">
+        SELECT CryptIT.decrypt(USR_PWD, 'SPI') AS USR_PWD
+		FROM ADM_USR
+		WHERE USR_ID = #{usrId}
+    </select>
+
+    <update id="updateDeviceToken" parameterType="HashMap">
+		/**[SQLID:mcm.Login.updateDeviceToken]*/
+		UPDATE	ADM_USR
+		SET		DVC_TKN_CD = #{deviceToken}
+		WHERE	USR_ID = #{usrId}
+	</update>
+
+</mapper>

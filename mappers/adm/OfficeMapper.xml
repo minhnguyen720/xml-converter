@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.OfficeMapper">
+
+    <resultMap id="AdmCoMap" type="AdmCoVO">
+        <result property="coCd" column="CO_CD"/>
+        <result property="coNm" column="CO_NM"/>
+    </resultMap>
+    <select id="selectCompanyByCode" resultMap="AdmCoMap">
+        /** OfficeMapper.selectCompanyByCode*/
+        SELECT
+            CO_CD,
+            CO_NM
+        FROM ADM_CO
+        WHERE DELT_FLG = 'N'
+          AND CO_CD = #{coCd}
+    </select>
+
+    <select id="selectAllCompany" resultMap="AdmCoMap">
+        /** OfficeMapper.selectAllCompany*/
+        SELECT
+            CO_CD,
+            CO_NM
+        FROM ADM_CO
+        WHERE DELT_FLG = 'N'
+    </select>
+
+    <resultMap id="AdmOfficeMap" type="AdmOfficeVo">
+        <result property="ofcCd" column="OFC_CD" />
+        <result property="coCd" column="CO_CD" />
+        <result property="ofcNm" column="OFC_NM" />
+        <result property="actFlg" column="ACT_FLG" />
+        <result property="bkgFlg" column="BKG_FLG" />
+        <result property="createUser" column="cre_usr_id" />
+        <result property="updateUser" column="upd_usr_id" />
+        <result property="createDate" column="cre_dt" />
+        <result property="updateDate" column="upd_dt" />
+        <result property="ofcShrtNm" column="OFC_SHRT_NM"/>
+    </resultMap>
+
+    <select id="selectOffices" resultMap="AdmOfficeMap">
+    	/** OfficeMapper.selectOffices */
+    	SELECT
+            OFC_CD, OFC_NM, ACT_FLG, BKG_FLG, CO_CD, cre_usr_id, upd_usr_id, cre_dt, upd_dt
+        FROM ADM_OFC
+        WHERE CO_CD = #{coCd}
+        AND ACT_FLG = #{actFlg}
+    </select>
+
+    <select id="existsOffice" resultMap="AdmOfficeMap">
+        /** OfficeMapper.existsOffice */
+        SELECT OFC_CD
+        FROM ADM_OFC
+        WHERE TRIM(LOWER(#{ofcNm})) = TRIM(LOWER(OFC_NM))
+        AND OFC_CD != #{ofcCd}
+    </select>
+
+    <insert id="insertOffice">
+        MERGE INTO ADM_OFC /** OfficeMapper.insertOffice */
+        USING DUAL
+        ON (OFC_CD = #{request.ofcCd})
+        WHEN MATCHED THEN
+            UPDATE
+                SET
+                    OFC_NM = #{request.ofcNm},
+                    ACT_FLG = #{request.actFlg},
+                    BKG_FLG = #{request.bkgFlg},
+                    upd_dt = sysdate,
+                    upd_usr_id = #{currentUser}
+        WHEN NOT MATCHED THEN
+            INSERT (OFC_CD, CO_CD, OFC_NM, ACT_FLG, BKG_FLG, CRE_DT, UPD_DT, CRE_USR_ID, UPD_USR_ID)
+            VALUES (FC_GET_SEQNO('ROM'), #{request.coCd}, #{request.ofcNm}, #{request.actFlg}, #{request.bkgFlg}, sysdate, sysdate, #{currentUser}, #{currentUser})
+    </insert>
+
+    <resultMap id="AdmMeetingRoomMap" type="AdmMetgRoomVO">
+        <result property="coCd" column="CO_CD" />
+        <result property="roomId" column="ROOM_ID" />
+        <result property="roomNm" column="ROOM_NM" />
+        <result property="roomDesc" column="ROOM_DESC" />
+        <result property="deltFlg" column="DELT_FLG" />
+        <result property="ordNo" column="ORD_NO" />
+        <result property="ofcCd" column="OFC_CD" />
+    </resultMap>
+
+    <select id="selectMeetingRoom" resultMap="AdmMeetingRoomMap">
+        /** OfficeMapper.selectMeetingRoom */
+        SELECT
+            ROOM_ID, ROOM_NM, ROOM_DESC, DELT_FLG, ORD_NO, OFC_CD, CO_CD
+        FROM ADM_METG_ROOM
+        WHERE OFC_CD = #{ofcCd}
+          AND DELT_FLG = #{deltFlg}
+        ORDER BY ORD_NO
+    </select>
+
+    <insert id="mergeMeetingRoom">
+        /** OfficeMapper.mergeMeetingRoom */
+        MERGE INTO ADM_METG_ROOM
+            USING DUAL
+            ON (ROOM_ID = #{item.roomId})
+            WHEN MATCHED THEN
+                UPDATE SET
+                    ROOM_NM = #{item.roomNm},
+                    ROOM_DESC = #{item.roomDesc},
+                    DELT_FLG = #{item.deltFlg},
+                    CO_CD = #{item.coCd},
+                    OFC_CD = #{item.ofcCd},
+                    ORD_NO = #{item.ordNo},
+                    UPD_DT = sysdate,
+                    UPD_USR_ID = #{currentUser}
+            WHEN NOT MATCHED THEN
+                INSERT (ROOM_ID, ROOM_NM, ROOM_DESC, DELT_FLG, CO_CD, OFC_CD, ORD_NO, CRE_DT, UPD_DT, CRE_USR_ID, UPD_USR_ID)
+                    VALUES (FC_GET_SEQNO('MTR'), #{item.roomNm},  #{item.roomDesc}, #{item.deltFlg}, #{item.coCd}, #{item.ofcCd}, #{item.ordNo}, sysdate, sysdate, #{currentUser}, #{currentUser})
+    </insert>
+
+    <select id="getOfficeInfo"  resultMap="AdmOfficeMap">
+        /**adm.MeetingAppointmentMapper.getOfficeInfo*/
+        SELECT
+            ofc_cd,
+            ofc_nm,
+            act_flg,
+            bkg_flg,
+            co_cd,
+            cre_usr_id,
+            upd_usr_id,
+            cre_dt,
+            upd_dt,
+            ofc_shrt_nm
+        FROM
+            adm_ofc
+        WHERE
+            ofc_cd = #{ofcCd}
+          AND act_flg = 'Y'
+          AND bkg_flg = 'Y'
+        ORDER BY
+            ofc_nm
+    </select>
+
+</mapper>

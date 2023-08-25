@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.ProjectResourceMapper">
+
+    <resultMap type="com.dou.adm.models.AdmPjtVO" id="AdmPjtVOMap">
+        <result property="prntPjtId" column="prntPjtId" javaType="String"/>
+        <result property="mgmtRoleId" column="mgmtRoleId" javaType="String"/>
+        <result property="pjtId" column="pjtId" javaType="String"/>
+        <result property="pjtNm" column="pjtNm" javaType="String"/>
+        <result property="mgrId" column="mgrId" javaType="String"/>
+        <result property="mgrNm" column="mgrNm" javaType="String"/>
+        <result property="stDt" column="stDt" javaType="String"/>
+        <result property="endDt" column="endDt" javaType="String"/>
+        <result property="useFlg" column="useFlg" javaType="String"/>
+        <result property="useMnuFlg" column="useMnuFlg" javaType="String"/>
+        <result property="dbTpCd" column="dbTpCd" javaType="String"/>
+        <result property="dbIp" column="dbIp" javaType="String"/>
+        <result property="dbUsrId" column="dbUsrId" javaType="String"/>
+        <result property="fwId" column="fwId" javaType="String"/>
+        <result property="dbPwd" column="dbPwd" javaType="String"/>
+        <result property="dbPortNo" column="dbPortNo" javaType="Short"/>
+        <result property="dbSvcId" column="dbSvcId" javaType="String"/>
+        <result property="dicTpCd" column="dicTpCd" javaType="String"/>
+        <result property="updDescFlg" column="updDescFlg" javaType="String"/>
+        <result property="useSplDatFlg" column="useSplDatFlg" javaType="String"/>
+        <result property="coCd" column="coCd" javaType="String"/>
+        <result property="pjtCd" column="pjtCd" javaType="String"/>
+        <result property="rootPjtId" column="rootPjtId" javaType="String"/>
+        <result property="dmUseFlg" column="dmUseFlg" javaType="String"/>
+        <result property="pjtPfxNm" column="pjtPfxNm" javaType="String"/>
+        <result property="useLgcFlg" column="useLgcFlg" javaType="String"/>
+        <result property="ownrNm" column="ownrNm" javaType="String"/>
+        <result property="strMode" column="mode" javaType="String"/>
+        <result property="level" column="level" javaType="String"/>
+    </resultMap>
+
+    <select id="selectPjtXmlInfo" resultMap="AdmPjtVOMap" parameterType="HashMap">
+        <!-- <if test='"".equals(isAdmin)'>
+            SELECT /** sqlMapProjectManagement.selectPjtXmlInfo*/
+            PRNT_PJT_ID AS "prntPjtId",
+            MGMT_ROLE_ID AS "mgmtRoleId",
+            PJT_ID AS "pjtId",
+            PJT_NM AS "pjtNm",
+            MGR_ID AS "mgrId",
+            MGR_NM AS "mgrNm",
+            ST_DT AS "stDt",
+            END_DT AS "endDt",
+            USE_FLG AS "useFlg",
+            USE_MNU_FLG AS "useMnuFlg",
+            DB_TP_CD AS "dbTpCd",
+            DB_IP AS "dbIp",
+            DB_USR_ID AS "dbUsrId",
+            FW_ID AS "fwId",
+            DB_PWD AS "dbPwd",
+            DB_SVC_ID AS "dbSvcId",
+            DIC_TP_CD AS "dicTpCd",
+            UPD_DESC_FLG AS "updDescFlg",
+            USE_SPL_DAT_FLG AS "useSplDatFlg",
+            CO_CD AS "coCd",
+            PJT_CD AS "pjtCd",
+            ROOT_PJT_ID AS "rootPjtId",
+            DM_USE_FLG AS "dmUseFlg",
+            PJT_PFX_NM AS "pjtPfxNm",
+            USE_LGC_FLG AS "useLgcFlg",
+            OWNR_NM AS "ownrNm",
+            '0' AS "mode",
+            LEVEL AS "level"
+            FROM
+            (SELECT NVL(PRNT_PJT_ID,0) PRNT_PJT_ID,
+            MGMT_ROLE_ID,
+            PJT_ID,
+            PJT_NM,
+            MGR_ID,
+            (SELECT USR_NM FROM ADM_USR WHERE USR_ID = MGR_ID
+            ) MGR_NM,
+            ST_DT,
+            END_DT,
+            USE_FLG,
+            USE_MNU_FLG,
+            DB_TP_CD,
+            DB_IP,
+            DB_USR_ID,
+            DB_PWD,
+            DB_PORT_NO,
+            FW_ID,
+            DB_SVC_ID,
+            DIC_TP_CD,
+            UPD_DESC_FLG,
+            USE_SPL_DAT_FLG,
+            CO_CD,
+            PJT_CD,
+            ROOT_PJT_ID,
+            DM_USE_FLG,
+            PJT_PFX_NM,
+            USE_LGC_FLG,
+            OWNR_NM
+            FROM ADM_PJT
+            WHERE PJT_TP_CD = 'ADM_PJT_TPPJT'
+            <if test='"".equals(isAdmin)'>
+                AND USE_FLG = #{useFlg}
+            </if>
+            )ADM_PJT_FILTER
+            START WITH PRNT_PJT_ID = '0'
+            CONNECT BY NOCYCLE PRIOR PJT_ID = PRNT_PJT_ID
+            ORDER SIBLINGS BY UPPER(PJT_NM)
+        </if> -->
+        <!-- <if test="isAdmin != ''"> -->
+            <!-- <if test="isAdmin != 'true'"> -->
+                SELECT /** sqlMapProjectManagement.selectPjtXmlInfo for user */
+                PRNT_PJT_ID AS "prntPjtId",
+                MGMT_ROLE_ID AS "mgmtRoleId",
+                PJT_ID AS "pjtId",
+                PJT_NM AS "pjtNm",
+                MGR_ID AS "mgrId",
+                MGR_NM AS "mgrNm",
+                ST_DT AS "stDt",
+                END_DT AS "endDt",
+                USE_FLG AS "useFlg",
+                <!-- USE_MNU_FLG AS "useMnuFlg", -->
+                <!-- DB_TP_CD AS "dbTpCd", -->
+                <!-- DB_IP AS "dbIp", -->
+                <!-- DB_USR_ID AS "dbUsrId", -->
+                <!-- FW_ID AS "fwId", -->
+                <!-- DB_PWD AS "dbPwd", -->
+                <!-- DB_SVC_ID AS "dbSvcId", -->
+                DIC_TP_CD AS "dicTpCd",
+                UPD_DESC_FLG AS "updDescFlg",
+                USE_SPL_DAT_FLG AS "useSplDatFlg",
+                CO_CD AS "coCd",
+                PJT_CD AS "pjtCd",
+                ROOT_PJT_ID AS "rootPjtId",
+                DM_USE_FLG AS "dmUseFlg",
+                PJT_PFX_NM AS "pjtPfxNm",
+                USE_LGC_FLG AS "useLgcFlg",
+                OWNR_NM AS "ownrNm",
+                '0' AS "mode",
+                LEVEL AS "level"
+                FROM
+                (SELECT NVL(TBL.PRNT_PJT_ID,0) PRNT_PJT_ID,
+                PJT.MGMT_ROLE_ID,
+                TBL.PJT_ID,
+                PJT.PJT_NM,
+                PJT.MGR_ID,
+                (SELECT USR_NM FROM ADM_USR WHERE USR_ID = MGR_ID
+                ) MGR_NM,
+                PJT.ST_DT,
+                PJT.END_DT,
+                PJT.USE_FLG,
+                <!-- PJT.USE_MNU_FLG, -->
+                <!-- PJT.DB_TP_CD,
+                PJT.DB_IP,
+                PJT.DB_USR_ID,
+                PJT.DB_PWD,
+                PJT.DB_PORT_NO, -->
+                <!-- PJT.FW_ID, -->
+                <!-- PJT.DB_SVC_ID, -->
+                PJT.DIC_TP_CD,
+                PJT.UPD_DESC_FLG,
+                PJT.USE_SPL_DAT_FLG,
+                PJT.CO_CD,
+                PJT.PJT_CD,
+                PJT.ROOT_PJT_ID,
+                PJT.DM_USE_FLG,
+                PJT.PJT_PFX_NM,
+                PJT.USE_LGC_FLG,
+                PJT.OWNR_NM
+                FROM
+                ( SELECT DISTINCT PRNT_PJT_ID,
+                PJT_ID
+                FROM ADM_PJT
+                WHERE PJT_TP_CD = 'ADM_PJT_TPPJT'
+                <if test="coCd != ''">
+                    AND CO_CD = #{coCd}
+                </if>
+                <if test="useFlg != ''">
+                    AND USE_FLG = #{useFlg}
+                </if>
+
+                AND PJT_ID IN
+                (SELECT DISTINCT PJT_ID
+                FROM ADM_PJT
+                WHERE 1 = 1
+                AND PJT_TP_CD ='ADM_PJT_TPPJT'
+                <if test="usrId != ''">
+                    START WITH MGR_ID = #{usrId}
+                    <!-- OR CRE_USR_ID = #{usrId} -->
+                    CONNECT BY NOCYCLE PRIOR PJT_ID = PRNT_PJT_ID
+                </if>
+                )
+                CONNECT BY NOCYCLE PRIOR PRNT_PJT_ID = PJT_ID
+                )TBL ,
+                ADM_PJT PJT
+                WHERE TBL.PJT_ID = PJT.PJT_ID
+                )ADM_PJT_FILTER
+                START WITH ADM_PJT_FILTER.PRNT_PJT_ID = '0'
+                CONNECT BY NOCYCLE PRIOR ADM_PJT_FILTER.PJT_ID = ADM_PJT_FILTER.PRNT_PJT_ID
+                ORDER SIBLINGS BY UPPER(PJT_NM)
+            <!-- </if> -->
+        <!-- </if> -->
+    </select>
+
+    <resultMap id="AdmCoMap" type="com.dou.adm.models.AdmCoVO">
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="coNm" column="CO_NM" javaType="String"/>
+    </resultMap>
+
+    <select id="selectCompanyMapWithProject" resultMap="AdmCoMap" parameterType="hashMap">
+        select 	/** sqlMapTeamManagement.selectCompanyMapWithProject */
+				COM.CO_CD,
+				COM.CO_NM
+		from	ADM_CO COM,
+				(select DISTINCT PJT.CO_CD from ADM_PJT PJT
+					where 1=1
+					AND PJT.CO_CD IS NOT NULL
+					AND PJT.DM_USE_FLG ='Y'
+					AND (PJT.CRE_USR_ID = #{userId} OR PJT.MGR_ID = #{userId})
+				)PJT
+		where	1 = 1
+		and 	COM.DELT_FLG <![CDATA[<>]]> 'Y'
+		and		COM.CO_CD = PJT.CO_CD
+		ORDER BY COM.CO_NM
+    </select>
+
+    <select id="searchAdmCoForComboboxPlugin" resultMap="AdmCoMap" parameterType="hashMap">
+        /** sqlMapTeamManagement.searchAdmCoForComboboxPlugin */
+        SELECT 	DISTINCT
+        TMP.CO_CD,
+        COM.CO_NM
+        FROM
+        (
+        SELECT DISTINCT SLS_CTRT_CO.CO_CD
+        FROM 	ADM_PJT_ITRTN ,
+        SLS_CTRT_CO
+        WHERE 1 = 1
+        <if test="pjtId != ''">
+            AND 	ADM_PJT_ITRTN.PJT_ID  = #{pjtId}
+        </if>
+        AND 	ADM_PJT_ITRTN.CTRT_ID = SLS_CTRT_CO.CTRT_ID
+        UNION ALL
+        SELECT 	COM.CO_CD
+        FROM 	ADM_PJT,
+        ADM_CO COM
+        WHERE 1 = 1
+        <if test="pjtId != ''">
+            AND 	ADM_PJT.PJT_ID  = #{pjtId}
+        </if>
+        AND 	COM.CO_CD = ADM_PJT.CO_CD
+        <if test="coCd != ''">
+            UNION ALL
+            SELECT 	CO_CD
+            FROM 	ADM_CO
+            WHERE 	1 = 1
+            AND		CO_CD = #{coCd}
+        </if>
+        ) TMP,
+        ADM_CO COM
+        WHERE 	1       = 1
+        <if test="coCd != ''">
+            AND 	TMP.CO_CD = #{coCd}
+        </if>
+        AND 	TMP.CO_CD = COM.CO_CD
+    </select>
+
+    <resultMap type="com.dou.pim.models.ProjectUserVO" id="PjtUsrMap">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="empeNo" column="EMPE_NO" javaType="String"/>
+        <result property="imgUrl" column="IMG_URL" javaType="String"/>
+        <result property="roleId" column="ROLE_ID" javaType="String"/>
+        <result property="roleNm" column="ROLE_NM" javaType="String"/>
+    </resultMap>
+
+    <select id="getListEmployee" parameterType="map" resultMap="PjtUsrMap">
+        SELECT
+        /* sys.ProjectUser.selectUserListByProjectId */
+        APU.USR_ID,
+        USR.USR_NM,
+        USR.EMPE_NO,
+        replace(USR.IMG_URL, '\', '/')    IMG_URL,
+        LISTAGG(APU.ROLE_ID,',') WITHIN GROUP (ORDER BY APU.ROLE_ID) ROLE_ID,
+        LISTAGG(RLE.ROLE_NM,',') WITHIN GROUP (ORDER BY RLE.ROLE_ID) ROLE_NM
+        FROM ADM_USR USR,
+        ADM_PJT_USR APU,
+        ADM_ROLE RLE
+        WHERE 1 = 1
+        AND USR.ACT_FLG <![CDATA[<>]]> 'N'
+        AND USR.DELT_STS_FLG <![CDATA[<>]]> 'Y'
+        AND APU.USR_ID = USR.USR_ID
+        AND APU.ROLE_ID = RLE.ROLE_ID
+        <if test="roleTpCd != ''">
+            AND RLE.ROLE_TP_CD = #{roleTpCd}
+        </if>
+        <if test="coCd != ''">
+            AND RLE.CO_CD = #{coCd}
+        </if>
+        <if test="mgmtRoleId != ''">
+            AND RLE.ROLE_ID <![CDATA[<>]]>
+            #{mgmtRoleId}
+        </if>
+        <if test="pjtId != ''">
+            AND APU.PJT_ID = #{pjtId}
+        </if>
+        GROUP BY APU.USR_ID,
+        USR.USR_NM,
+        USR.EMPE_NO,
+        USR.IMG_URL
+        ORDER BY USR.USR_NM
+    </select>
+
+    <resultMap type="com.dou.adm.models.AdmRoleVO" id="UsrRoleMap">
+        <result property="roleId" column="ROLE_ID" javaType="String"/>
+        <result property="prntRoleId" column="PRNT_ROLE_ID" javaType="String"/>
+        <result property="roleNm" column="ROLE_NM" javaType="String"/>
+        <result property="roleDesc" column="ROLE_DESC" javaType="String"/>
+        <result property="roleTpCd" column="ROLE_TP_CD" javaType="String"/>
+        <result property="isHardRole" column="IS_HARD_ROLE" javaType="String"/>
+        <result property="ordNo" column="ORD_NO" javaType="String"/>
+        <result property="uqflg" column="UQ_FLG" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+    </resultMap>
+
+    <select id="selectUsrRoleByRoleTpCd" resultMap="UsrRoleMap" parameterType="hashMap">
+        select /* cas.RoleAuthorityManagement.selectUsrRoleByRoleTpCd */
+        ROLE_ID,
+        PRNT_ROLE_ID,
+        ROLE_NM,
+        ROLE_DESC,
+        ROLE_TP_CD,
+        IS_HARD_ROLE,
+        NVL(ORD_NO, 0) ORD_NO,
+        UQ_FLG,
+        CO_CD
+        from ADM_ROLE
+        <trim prefix="where" prefixOverrides="and" suffixOverrides=",">
+            <if test="roleTpCd != null ">
+                AND ROLE_TP_CD = #{roleTpCd}
+            </if>
+            <if test="coCd != null and coCd != ''">
+                AND CO_CD = #{coCd}
+            </if>
+            <if test="mgmtRoleId != null">
+                AND ROLE_ID <![CDATA[<>]]> #{mgmtRoleId}
+            </if>
+            <if test="uqFlg != null">
+                AND UQ_FLG = #{uqFlg}
+            </if>
+            <if test="usrId != null and usrId != '' ">
+                AND (PRNT_ROLE_ID in (SELECT DISTINCT ROLE_ID FROM ADM_PJT_USR WHERE USR_ID = #{usrId}
+                UNION SELECT DISTINCT ROLE_ID FROM ADM_USR_ROLE WHERE USR_ID = #{usrId})
+                OR
+                ROLE_ID in (SELECT DISTINCT ROLE_ID FROM ADM_PJT_USR WHERE USR_ID = #{usrId}
+                UNION SELECT DISTINCT ROLE_ID FROM ADM_USR_ROLE WHERE USR_ID = #{usrId}))
+            </if>
+            <if test="roleId != null">
+                START WITH ROLE_ID = #{roleId}
+                CONNECT BY PRIOR ROLE_ID = PRNT_ROLE_ID
+            </if>
+        </trim>
+        order by ORD_NO asc, ROLE_NM asc
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true">
+		insert  /** AdmRole.insert */
+		into ADM_ROLE(
+				ROLE_ID,
+				PRNT_ROLE_ID,
+				ROLE_NM,
+				ROLE_DESC,
+				ROLE_TP_CD,
+				IS_HARD_ROLE,
+				ORD_NO,
+				CO_CD,
+				UQ_FLG,
+				CRE_USR_ID,
+				UPD_USR_ID
+
+		)
+		values(
+				#{roleId},
+				#{prntRoleId},
+				#{roleNm},
+				#{roleDesc},
+				#{roleTpCd},
+				#{isHardRole},
+				#{ordNo},
+				#{coCd},
+				#{uqflg},
+				#{createUser},
+				#{updateUser}
+				)
+    </insert>
+
+    <update id="update" parameterType="map">
+        update /** AdmRole.update */
+        ADM_ROLE
+        <trim prefix="SET" prefixOverrides=",">
+
+            <if test="prntRoleId != null and prntRoleId != ''">
+                PRNT_ROLE_ID = #{prntRoleId}
+            </if>
+            <if test="roleNm != null and roleNm != ''">
+                ,ROLE_NM = #{roleNm}
+            </if>
+            <if test="roleDesc != null and roleDesc != ''">
+                ,ROLE_DESC = #{roleDesc}
+            </if>
+            <if test="roleTpCd != null and roleTpCd != ''">
+                ,ROLE_TP_CD = #{roleTpCd}
+            </if>
+            <if test="isHardRole != null and isHardRole != ''">
+                ,IS_HARD_ROLE = #{isHardRole}
+            </if>
+            <if test="ordNo != null and ordNo != ''">
+                ,ORD_NO = #{ordNo}
+            </if>
+            <if test="coCd != null and coCd != ''">
+                ,CO_CD = #{coCd}
+            </if>
+            <if test="uqflg != null and uqflg != ''">
+                ,UQ_FLG = #{uqflg}
+            </if>
+            <if test="updateUser != null and updateUser != ''">
+                ,UPD_USR_ID = #{updateUser}
+            </if>
+                ,UPD_DT = sysdate
+        </trim>
+        where ROLE_ID = #{roleId}
+    </update>
+
+    <select id="selectSeqNo" parameterType="map" resultType="String">
+		select
+			fc_get_seqno(#{module})
+		from
+			dual
+	</select>
+
+    <resultMap type="com.dou.adm.models.InquiryStaffVO" id="SelectStaffMap">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="hmPhnNo" column="HM_TEL_NO" javaType="String"/>
+        <result property="eml" column="USR_EML" javaType="String"/>
+        <result property="mphnNo" column="MPHN_NO" javaType="String"/>
+        <!--		<result property="teamId" column="TEAM_ID" javaType="String"/>-->
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+        <result property="coNm" column="CO_NM" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <!--		<result property="aplyStDt" column="APLY_ST_DT" javaType="String"/>-->
+        <!--		<result property="aplyEndDt" column="APLY_END_DT" javaType="String"/>-->
+    </resultMap>
+
+    <select id="searchStaffPjt_id" resultMap="SelectStaffMap" parameterType="hashMap">
+        select /**[SQLID:mcm.InquiryStaff.searchStaffPjt_id]*/
+        DISTINCT
+        USR.USR_ID,
+        USR.USR_NM,
+        USR.HM_TEL_NO,
+        USR.USR_EML,
+        USR.MPHN_NO,
+        CO.CO_NM,
+        USR.CO_CD,
+        (SELECT TEA.TEAM_NM
+        FROM ADM_TEAM TEA, ADM_TEAM_USR TUS
+        WHERE 1 = 1
+        AND TUS.APRO_OWNR_FLG = 'Y'
+        AND TEA.TEAM_ID = TUS.TEAM_ID
+        AND TUS.USR_ID = USR.USR_ID )TEAM_NM
+
+        FROM
+        ADM_USR USR
+        , ADM_CO CO
+        WHERE USR.CO_CD = CO.CO_CD
+        AND USR.ACT_FLG = 'Y'
+        <if test="pjtId != ''">
+            AND USR.CO_CD IN
+            (SELECT DISTINCT *
+            FROM
+            ( SELECT DISTINCT SLS_CTRT_CO.CO_CD
+            FROM ADM_PJT_ITRTN ,
+            SLS_CTRT_CO
+            WHERE ADM_PJT_ITRTN.PJT_ID = #{pjtId}
+            AND ADM_PJT_ITRTN.CTRT_ID = SLS_CTRT_CO.CTRT_ID
+            UNION ALL
+            SELECT CO_CD FROM ADM_PJT WHERE ADM_PJT.PJT_ID = #{pjtId}
+            )
+            )
+        </if>
+        ORDER BY USR_NM
+    </select>
+
+    <resultMap type="com.dou.adm.models.AdmTeamVO" id="TeamMap">
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+    </resultMap>
+
+    <select id="selectUserLeader" resultMap="TeamMap" parameterType="hashMap">
+		/** ProjectManagement.selectUserLeader */
+		SELECT TEAM_ID,
+			  TEAM_NM
+		FROM ADM_TEAM
+		WHERE DELT_STS_FLG             = 'N'
+		AND TEAM_MGR_ID = #{usrId}
+		AND ROWNUM = 1
+		  START WITH TEAM_ID = #{teamId}
+		  CONNECT BY NOCYCLE TEAM_ID = PRIOR PRNT_TEAM_ID
+	</select>
+
+    <resultMap type="ProjectUserVO" id="PjtRoleMap">
+		<result property="pjtId" column="PJT_ID" javaType="String" />
+		<result property="roleId" column="ROLE_ID" javaType="String" />
+		<result property="usrId" column="USR_ID" javaType="String" />
+	</resultMap>
+
+	<select id="selectAllChildAndRole" parameterType="hashMap"
+		resultMap="PjtRoleMap">
+		SELECT USR.PJT_ID,
+		USR.ROLE_ID,
+		USR.USR_ID
+		FROM
+		(SELECT PJT_ID
+		FROM ADM_PJT
+		WHERE PJT_TP_CD = 'ADM_PJT_TPPJT'
+		START WITH PRNT_PJT_ID = #{pjtId}
+		CONNECT BY NOCYCLE PRIOR PJT_ID = PRNT_PJT_ID
+		) PJT ,
+		ADM_PJT_USR USR
+		WHERE PJT.PJT_ID = USR.PJT_ID(+)
+		<if test="usrId != null">
+			AND USR_ID = #{usrId}
+        </if>
+		ORDER BY USR.PJT_ID
+    </select>
+
+    <delete id="deleteRoleOfUserInProject" parameterType="AdmPjtUsrVO">
+		delete  /** AdmPjtUsr.deleteRoleOfUserInProject */
+		ADM_PJT_USR
+		where	1 = 1
+		and		USR_ID = #{usrId}
+		and		PJT_ID = #{pjtId}
+		and 	ROLE_ID = #{roleId}
+    </delete>
+
+    <insert id="insertProjectRole" parameterType="AdmPjtUsrVO">
+		insert  /** AdmPjtUsr.insertProjectRole */
+		into ADM_PJT_USR(
+				USR_ID,
+                PJT_ID,
+                <if test="stDt != null">
+                    ST_DT,
+                </if>
+                <if test="endDt != null">
+                    END_DT,
+                </if>
+				ROLE_ID,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+				)
+		values(
+				#{usrId},
+                #{pjtId},
+                <if test="stDt != null">
+                    #{stDt},
+                </if>
+                <if test="endDt != null">
+                    #{endDt},
+                </if>
+				#{roleId},
+				#{createUser}, sysdate, #{updateUser}, sysdate
+				)
+    </insert>
+    
+    <select id="selectAllUniqueRoleInProject" resultMap="UsrRoleMap" parameterType="hashMap">
+            SELECT
+                apu.role_id,ar.ROLE_NM
+            FROM
+                adm_pjt_usr apu,
+                adm_role ar
+            WHERE
+                pjt_id = #{pjtId}
+                AND   ar.role_id = apu.role_id
+                AND   ar.uq_flg = 1
+    </select>
+
+    <resultMap id="usrIdMapRoleId" type="java.util.Map">
+        <id column="USR_ID" property="usr_id" />
+        <collection property="roleArray" ofType="java.lang.String" javaType="list">
+            <result column="ROLE_ID" />
+        </collection>
+    </resultMap>
+    
+    <select id="selectRoleByUserByProject" resultMap="usrIdMapRoleId" >
+        SELECT
+            ROLE_ID,USR_ID
+        FROM
+            adm_pjt_usr
+        WHERE 1=1
+            AND usr_id IN 
+            <foreach collection="usrList" item="item" separator="," close=")" open="(">
+                #{item.usrId}
+            </foreach>
+            AND   pjt_id = 'PJT20200206000000002'
+    </select>
+
+
+    <select id="checkRoleIsUniqueBeforeSetUnique" resultType = "Integer" parameterType="hashMap">
+        SELECT
+            COUNT(usr_id) count
+        FROM
+            adm_pjt_usr
+        WHERE
+            role_id = #{roleId}
+            AND   pjt_id IN (
+                SELECT
+                    pjt_id
+                FROM
+                    adm_pjt
+                WHERE
+                    adm_pjt.co_cd = #{coCd}
+                    AND USE_FLG = 'Y'
+                    AND pjt_tp_cd = 'ADM_PJT_TPPJT'
+            )
+        GROUP BY
+            pjt_id
+    </select>
+</mapper>

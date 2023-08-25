@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.CalendarSettingMapper">
+
+    <resultMap id="AdmCoMap" type="com.dou.adm.models.AdmCoVO">
+        <result property="coCd"         column="CO_CD"          javaType="String"/>
+        <result property="coNm"         column="CO_NM"          javaType="String"/>
+        <result property="ceoNm"        column="CEO_NM"         javaType="String"/>
+        <result property="addr"         column="ADDR"           javaType="String"/>
+        <result property="coTpCd"       column="CO_TP_CD"       javaType="String"/>
+        <result property="contactUsrId" column="CONTACT_USR_ID" javaType="String"/>
+        <result property="cntCd"        column="CNT_CD"         javaType="String"/>
+        <result property="ctyNm"        column="CTY_NM"         javaType="String"/>
+        <result property="endTmNo"      column="END_TM_NO"      javaType="Float"/>
+        <result property="lunHrNo"      column="LUN_HR_NO"      javaType="Float"/>
+        <result property="stLunTmNo"    column="ST_LUN_TM_NO"   javaType="Float"/>
+        <result property="stTmNo"       column="ST_TM_NO"       javaType="Float"/>
+        <result property="wrkHrNo"      column="WRK_HR_NO"      javaType="Float"/>
+        <result property="wrkDyCd"      column="WRK_DY_CD"      javaType="String"/>
+        <result property="utcTmNo"      column="UTC_TM_NO"      javaType="Float"/>
+        <result property="createUser"   column="cre_usr_id" />
+        <result property="updateUser"   column="upd_usr_id" />
+        <result property="createDate"   column="cre_dt" />
+        <result property="updateDate"   column="upd_dt" />
+    </resultMap>
+
+    <select id="selectCompanyByKey" resultMap="AdmCoMap" parameterType="map">
+		select 	/** AdmCo.selectByKey */
+				CO_CD,
+				CO_NM,
+				CEO_NM,
+				ADDR,
+				CO_TP_CD,
+				CONTACT_USR_ID,
+				CNT_CD,
+				CTY_NM,
+				END_TM_NO,
+				LUN_HR_NO,
+				ST_LUN_TM_NO,
+				ST_TM_NO,
+				WRK_HR_NO,
+				WRK_DY_CD,
+				UTC_TM_NO,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+		from	ADM_CO
+		where	1 = 1
+		and		CO_CD = #{coCd}
+	</select>
+
+    <select id="selectAllCompany" resultMap="AdmCoMap">
+        select 	/** AdmCo.selectAll */
+				CO_CD,
+				CO_NM,
+				CEO_NM,
+				ADDR,
+				CO_TP_CD,
+				CONTACT_USR_ID,
+				CNT_CD,
+				CTY_NM,
+				END_TM_NO,
+				LUN_HR_NO,
+				ST_LUN_TM_NO,
+				ST_TM_NO,
+				WRK_HR_NO,
+				WRK_DY_CD,
+				UTC_TM_NO,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+		from	ADM_CO
+		where 	1=1 and
+				DELT_FLG <![CDATA[<>]]> 'Y'
+    </select>
+
+	<update id="update" parameterType="AdmCoVo">
+		update  /** AdmCo.update */
+		ADM_CO set
+				CO_CD = #{coCd},
+				CO_NM = #{coNm},
+				CEO_NM = #{ceoNm},
+				ADDR = #{addr},
+				CO_TP_CD = #{coTpCd},
+				CONTACT_USR_ID = #{contactUsrId},
+				CNT_CD = #{cntCd},
+				CTY_NM = #{ctyNm},
+				END_TM_NO = #{endTmNo},
+				LUN_HR_NO = #{lunHrNo},
+				ST_LUN_TM_NO = #{stLunTmNo},
+				ST_TM_NO = #{stTmNo},
+				WRK_HR_NO = #{wrkHrNo},
+				WRK_DY_CD = #{wrkDyCd},
+				UTC_TM_NO = #{utcTmNo},
+				upd_usr_id = #{updateUser},
+				upd_dt = sysdate
+		where	1 = 1
+		and		CO_CD = #{coCd}
+	</update>
+
+	<update id="updateCalendarSetting" parameterType="AdmCoVo">
+		update  /** AdmCo.updateWithMap */
+		ADM_CO set
+		<if test="coCd != null and coCd != ''">
+			CO_CD = #{coCd},
+		</if>
+		<if test="coNm != null and coNm != ''">
+			CO_NM = #{coNm},
+		</if>
+		<if test="ceoNm != null and ceoNm != ''">
+			CEO_NM = #{ceoNm},
+		</if>
+		<if test="addr != null and addr != ''">
+			ADDR = #{addr},
+		</if>
+		<if test="coTpCd != null and coTpCd != ''">
+			CO_TP_CD = #{coTpCd},
+		</if>
+		<if test="contactUsrId != null and contactUsrId != ''">
+			CONTACT_USR_ID = #{contactUsrId},
+		</if>
+		<if test="cntCd != null and cntCd != ''">
+			CNT_CD = #{cntCd},
+		</if>
+		<if test="ctyNm != null and ctyNm != ''">
+			CTY_NM = #{ctyNm},
+		</if>
+		<if test="endTmNo != null and endTmNo != ''">
+			END_TM_NO = #{endTmNo},
+		</if>
+		<if test="lunHrNo != null and lunHrNo != ''">
+			LUN_HR_NO = #{lunHrNo},
+		</if>
+		<if test="stLunTmNo != null and stLunTmNo != ''">
+			ST_LUN_TM_NO = #{stLunTmNo},
+		</if>
+		<if test="stTmNo != null and stTmNo != ''">
+			ST_TM_NO = #{stTmNo},
+		</if>
+		<if test="wrkHrNo != null and wrkHrNo != ''">
+			WRK_HR_NO = #{wrkHrNo},
+		</if>
+		<if test="wrkDyCd != null and wrkDyCd != ''">
+			WRK_DY_CD = #{wrkDyCd},
+		</if>
+		<if test="utcTmNo != null and utcTmNo != ''">
+			UTC_TM_NO = #{utcTmNo},
+		</if>
+		upd_usr_id = #{updateUser},
+		upd_dt = sysdate
+		where	1 = 1
+		and		CO_CD = #{coCd}
+	</update>
+
+</mapper>

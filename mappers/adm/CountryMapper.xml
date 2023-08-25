@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.CountryMapper">
+    <resultMap type="AdmCntVO" id="AdmCntMap">
+        <result property="cntCd" column="CNT_CD" javaType="String"/>
+        <result property="cntNm" column="CNT_NM" javaType="String"/>
+        <result property="ntnNm" column="NTN_NM" javaType="String"/>
+        <result property="phnCd" column="PHN_CD" javaType="Integer"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+    </resultMap>
+    <select id="select" resultMap="AdmCntMap">
+        select /** AdmCnt.select */
+            CNT_CD,
+            CNT_NM,
+            NTN_NM,
+            PHN_CD,
+            cre_usr_id,
+            cre_dt,
+            upd_usr_id,
+            upd_dt
+        from ADM_CNT
+    </select>
+</mapper>

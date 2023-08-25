@@ -1,0 +1,1196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.BoardManagementMapper">
+
+    <resultMap type="AdmComCdVO" id="AdmComCdVOMap">
+        <result property="comCd" column="COM_CD" javaType="String"/>
+        <result property="prntCd" column="PRNT_CD" javaType="String"/>
+        <result property="cdNm" column="CD_NM" javaType="String"/>
+        <result property="cdShrtNm" column="CD_SHRT_NM" javaType="String"/>
+        <result property="imgUrl" column="IMG_URL" javaType="String"/>
+    </resultMap>
+
+    <select id="selectComCdByPrntCd" resultMap="AdmComCdVOMap">
+        select /** mcm.CommonCode.selectComCdByPrntCd */
+            concat(ADM_COM_CD.PRNT_CD, ADM_COM_CD.COM_CD) as COM_CD,
+            ADM_COM_CD.PRNT_CD,
+            ADM_COM_CD.CD_NM,
+            ADM_COM_CD.CD_SHRT_NM,
+            ADM_COM_CD.IMG_URL
+        from   ADM_COM_CD
+        where  PRNT_CD = #{prntCd}
+          and (USE_FLG IS NULL OR UPPER(USE_FLG) = 'Y')
+          and (DELT_STS_FLG IS NULL OR UPPER(DELT_STS_FLG) != 'Y')
+        order by ADM_COM_CD.ORD_BY_NO ASC
+    </select>
+
+    <resultMap type="PimAdm021VO" id="PimTpcVOMap">
+        <result property="tpcId" column="tpcId" javaType="String"/>
+        <result property="tpcNm" column="tpcNm" javaType="String"/>
+        <result property="prntTpcId" column="prntTpcId" javaType="String"/>
+        <result property="tpCd" column="tpCd" javaType="String"/>
+        <result property="level" column="level" javaType="String"/>
+    </resultMap>
+
+    <select id="selectSubTopicXML" resultMap="PimTpcVOMap" parameterType="hashMap">
+        SELECT /** BoardManagement.selectSubTopicXML */
+            TPC_ID as "tpcId",
+            TPC_NM as "tpcNm",
+            PRNT_TPC_ID as "prntTpcId",
+            TP_CD as "tpCd",
+            LEVEL as "level"
+        FROM
+            (
+                SELECT
+                    TPC_ID,
+                    TPC_NM,
+                    PRNT_TPC_ID,
+                    TP_CD
+                FROM
+                    (
+                        (
+                            SELECT
+                                TPC_ID,
+                                TPC_NM,
+                                PRNT_TPC_ID,
+                                'SUB_BRD' as TP_CD
+                            FROM
+                                (
+                                    SELECT
+                                        COM_CD as TPC_ID,
+                                        CD_NM as TPC_NM,
+                                        PRNT_CD as PRNT_TPC_ID
+                                    FROM ADM_COM_CD
+                                    WHERE PRNT_CD || COM_CD = #{subBrdTpCd}
+                                      AND DELT_STS_FLG = 'N'
+                                    ORDER BY ORD_BY_NO
+                                )
+                        )
+                        union all
+                        (
+                            SELECT
+                                TPC_ID,
+                                TPC_NM,
+                                PRNT_TPC_ID,
+                                'TOPIC' as TP_CD
+                            FROM PIM_TPC
+                            WHERE DELT_FLG = 'N'
+                                START WITH TPC_ID in
+                                (
+                                SELECT TPC_ID
+                                FROM
+                                (SELECT COM_CD
+                                FROM ADM_COM_CD
+                                WHERE PRNT_CD || COM_CD = #{subBrdTpCd}
+                                and DELT_STS_FLG = 'N'
+                                ORDER BY ORD_BY_NO
+                                ) COM,
+                                PIM_TPC
+                                WHERE COM.COM_CD = PRNT_TPC_ID and PIM_TPC.DELT_FLG = 'N'
+                                )
+                            CONNECT BY NOCYCLE PRIOR TPC_ID = PRNT_TPC_ID)
+                    )
+            ) FILTER
+            START WITH FILTER.PRNT_TPC_ID = #{masterTopicCode}
+        CONNECT BY NOCYCLE PRIOR FILTER.TPC_ID = FILTER.PRNT_TPC_ID
+    </select>
+
+    <select id="selectCompanyXML" resultMap="PimTpcVOMap" parameterType="hashMap">
+        SELECT
+        /** BoardManagement.selectCompanyXML */
+        TPC_ID AS "tpcId",
+        TPC_NM AS "tpcNm",
+        PRNT_TPC_ID AS "prntTpcId",
+        TP_CD AS "tpCd",
+        LEVEL AS "level"
+        FROM
+        (SELECT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        TP_CD
+        FROM (
+        (SELECT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        'SUB_BRD' AS TP_CD
+        FROM
+        (SELECT COM_CD AS TPC_ID,
+        CD_NM AS TPC_NM,
+        PRNT_CD AS PRNT_TPC_ID
+        FROM ADM_COM_CD
+        WHERE PRNT_CD
+        || COM_CD = #{subBrdTpCd}
+        AND DELT_STS_FLG = 'N'
+        ORDER BY ORD_BY_NO
+        )
+        )
+        UNION ALL
+        (SELECT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        TP_CD
+        FROM
+        (SELECT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        CASE
+        WHEN TPC_TP_CD = 'TPC_TP_CDCMP'
+        THEN 'COMPANY'
+        WHEN TPC_TP_CD = 'TPC_TP_CDTEA'
+        THEN 'TEAM'
+        ELSE 'TOPIC'
+        END TP_CD
+        FROM
+        (SELECT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        TPC_TP_CD
+        FROM PIM_TPC
+        WHERE 1 =1
+        AND TPC_TP_CD IN (#{tpcTpCdCmp},#{tpcTpCdTea})
+        AND TPC_ID IN
+        (SELECT TPC_ID
+        FROM PIM_TPC
+        WHERE OBJ_ID IN
+        (SELECT OBJ_ID
+        FROM
+        (SELECT CO_CD AS OBJ_ID
+        FROM ADM_CO
+        WHERE 1 = 1
+        <if test='!"Y".equals(adminFlag)'>
+            AND CO_CD = #{companyCode}
+        </if>
+        )
+        UNION ALL (
+        <if test='!"Y".equals(adminFlag)'>
+            SELECT DISTINCT TEAM_ID AS OBJ_ID
+            FROM (
+            (SELECT TEAM_ID,
+            PRNT_TEAM_ID
+            FROM ADM_TEAM
+            WHERE DELT_STS_FLG = 'N'
+            START WITH TEAM_ID IN
+            ( SELECT DISTINCT TEAM_ID
+            FROM
+            (SELECT TEAM_ID
+            FROM ADM_TEAM
+            START WITH TEAM_MGR_ID = #{usrId}
+            CONNECT BY NOCYCLE PRIOR TEAM_ID = PRNT_TEAM_ID
+            )
+            UNION ALL
+            (SELECT DISTINCT TEAM.TEAM_ID
+            FROM ADM_TEAM TEAM,
+            ADM_TEAM_USR TEAM_USR
+            WHERE TEAM.TEAM_ID = TEAM_USR.TEAM_ID
+            AND TEAM_USR.USR_ID = #{usrId}
+            )
+            )
+            CONNECT BY NOCYCLE PRIOR PRNT_TEAM_ID = TEAM_ID
+            ))
+            START WITH PRNT_TEAM_ID = '0'
+            CONNECT BY NOCYCLE PRIOR TEAM_ID = PRNT_TEAM_ID
+        </if>
+        <if test='"Y".equals(adminFlag)'>
+            SELECT DISTINCT TEAM_ID AS OBJ_ID
+            FROM ADM_TEAM
+            WHERE DELT_STS_FLG = 'N'
+        </if>
+        )
+        )
+        AND DELT_FLG = 'N'
+        )
+        START WITH PRNT_TPC_ID = 'CMP'
+        CONNECT BY NOCYCLE PRIOR TPC_ID = PRNT_TPC_ID
+        )
+        )
+        )
+        UNION ALL
+        (SELECT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        'TOPIC' AS TP_CD
+        FROM PIM_TPC
+        WHERE DELT_FLG = 'N'
+        AND TPC_TP_CD = #{tpcTpCd}
+        START WITH PRNT_TPC_ID = 'CMP'
+        CONNECT BY NOCYCLE PRIOR TPC_ID = PRNT_TPC_ID
+        ) )
+        ) FILTER
+        START WITH FILTER.PRNT_TPC_ID = #{masterTopicCode}
+        CONNECT BY NOCYCLE PRIOR FILTER.TPC_ID = FILTER.PRNT_TPC_ID
+    </select>
+
+    <select id="selectProjectXML" resultMap="PimTpcVOMap" parameterType="hashMap">
+        SELECT
+        /** BoardManagement.selectProjectXML */
+        TPC_ID AS "tpcId",
+        TPC_NM AS "tpcNm",
+        PRNT_TPC_ID AS "prntTpcId",
+        TP_CD AS "tpCd",
+        LEVEL AS "level"
+        FROM
+        (SELECT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        TP_CD
+        FROM (
+        (SELECT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        'SUB_BRD' AS TP_CD
+        FROM
+        (SELECT COM_CD AS TPC_ID,
+        CD_NM AS TPC_NM,
+        PRNT_CD AS PRNT_TPC_ID
+        FROM ADM_COM_CD
+        WHERE PRNT_CD
+        || COM_CD = #{subBrdTpCd}
+        AND DELT_STS_FLG = 'N'
+        ORDER BY ORD_BY_NO
+        )
+        )
+        UNION ALL
+        (SELECT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        TP_CD
+        FROM
+        (SELECT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        CASE
+        WHEN TPC_TP_CD = 'TPC_TP_CDPJT'
+        THEN 'PROJECT'
+        ELSE 'TOPIC'
+        END TP_CD
+        FROM
+        (SELECT DISTINCT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        TPC_TP_CD
+        FROM PIM_TPC
+        WHERE 1 =1
+        AND TPC_TP_CD = #{tpcTpCdPjt}
+        START WITH OBJ_ID IN
+        (SELECT PJT_ID
+        FROM ADM_PJT
+        WHERE PJT_TP_CD = 'ADM_PJT_TPPJT'
+        AND USE_FLG = 'Y'
+        <if test=' !"Y".equals(adminFlag)'>
+            START WITH PJT_ID IN
+            (SELECT DISTINCT PJT_ID
+            FROM
+            (SELECT PJT_ID
+            FROM
+            (SELECT PJT_ID
+            FROM ADM_PJT
+            WHERE PJT_TP_CD ='ADM_PJT_TPPJT'
+            AND USE_FLG ='Y'
+            START WITH MGR_ID =#{usrId}
+            CONNECT BY NOCYCLE PRIOR PJT_ID = PRNT_PJT_ID
+            )
+            UNION ALL
+            ( SELECT DISTINCT PJT.PJT_ID
+            FROM ADM_PJT PJT,
+            ADM_PJT_USR PJT_USR
+            WHERE PJT_TP_CD ='ADM_PJT_TPPJT'
+            AND PJT.USE_FLG ='Y'
+            AND PJT.PJT_ID = PJT_USR.PJT_ID
+            AND PJT_USR.USR_ID = #{usrId}
+            )
+            )
+            )
+        </if>
+        CONNECT BY NOCYCLE PRIOR PRNT_PJT_ID = PJT_ID
+        )
+        CONNECT BY NOCYCLE PRIOR PRNT_TPC_ID = TPC_ID
+        )
+        )
+        )
+        UNION ALL
+        (SELECT TPC_ID,
+        TPC_NM,
+        PRNT_TPC_ID,
+        'TOPIC' AS TP_CD
+        FROM PIM_TPC
+        WHERE DELT_FLG = 'N'
+        AND TPC_TP_CD = #{tpcTpCd}
+        START WITH PRNT_TPC_ID = 'PJT'
+        CONNECT BY NOCYCLE PRIOR TPC_ID = PRNT_TPC_ID
+        ) )
+        ) FILTER
+        START WITH FILTER.PRNT_TPC_ID = #{masterTopicCode}
+        CONNECT BY NOCYCLE PRIOR FILTER.TPC_ID = FILTER.PRNT_TPC_ID
+    </select>
+
+    <resultMap type="PostVO" id="PostMap">
+        <result property="tpcId" column="TPC_ID" javaType="String"/>
+        <result property="pstId" column="PST_ID" javaType="String"/>
+        <result property="cmtNo" column="CMT_NO" javaType="Integer"/>
+        <result property="likeNo" column="LIKE_NO" javaType="Integer"/>
+        <result property="pstCtnt" column="PST_CTNT" javaType="String"/>
+        <result property="deltFlg" column="DELT_FLG" javaType="String"/>
+        <result property="objId" column="OBJ_ID" javaType="String"/>
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="urlImg" column="IMG_URL"/>
+        <result property="objTblNm" column="OBJ_TBL_NM" javaType="String"/>
+        <result property="readFlg" column="READ_FLG" javaType="String"/>
+        <result property="prntPstId" column="PRNT_PST_ID" javaType="String"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+        <result property="pstTitNm" column="PST_TIT_NM" javaType="String"/>
+        <result property="lblPstTitNm" column="LBL_PST_TIT_NM" javaType="String"/>
+    </resultMap>
+
+    <select id="selectPostListBeLongToTopic" resultMap="PostMap" parameterType="map">
+        select /** BoardManagement.selectPostListBeLongToTopic */
+        pst.TPC_ID,
+        pst.PST_ID,
+        pst.CMT_NO,
+        pst.LIKE_NO,
+        pst.PST_CTNT,
+        pst.DELT_FLG,
+        pst.OBJ_ID,
+        pst.USR_ID,
+        usr.IMG_URL,
+        usr.USR_NM,
+        pst.OBJ_TBL_NM,
+        pst.READ_FLG,
+        pst.PRNT_PST_ID,
+        pst.cre_usr_id,
+        to_char(pst.cre_dt, 'YYYYMMDDHH24MI') cre_dt,
+        pst.upd_usr_id,
+        to_char(pst.upd_dt, 'YYYYMMDDHH24MI') upd_dt,
+        <!--				LEVEL,-->
+        pst.PST_TIT_NM,
+        '
+        <![CDATA[<]]>
+        B
+        <![CDATA[>]]>
+        ' || pst.PST_TIT_NM || '
+        <![CDATA[<]]>
+        /B
+        <![CDATA[>]]>
+        ' || chr(10) || to_char(pst.upd_dt, 'YYYY-Mon-DD HH24:MI') || ' by ' || pst.cre_usr_id as LBL_PST_TIT_NM
+        <!--				case when LEVEL = 1 then-->
+        <!--					'<![CDATA[<]]>B<![CDATA[>]]>' || PST_TIT_NM || '<![CDATA[<]]>/B<![CDATA[>]]>' || chr(10) || to_char(upd_dt, 'YYYY-Mon-DD HH24:MI') || '  by ' || cre_usr_id -->
+        <!--				else-->
+        <!--					PST_TIT_NM || chr(10) || to_char(upd_dt, 'YYYY-Mon-DD HH24:MI') || '  by ' || cre_usr_id-->
+        <!--				end LBL_PST_TIT_NM-->
+        from PIM_PST pst,
+        ADM_USR usr
+        where 1 = 1
+        and
+        pst.upd_usr_id = USR.USR_ID
+        and TPC_ID = #{tpcId}
+        and DELT_FLG = #{deltFlg}
+        <if test="pstTpCd !=  '' ">
+            and PST_TP_CD = #{pstTpCd}
+        </if>
+        <!--		Start With PRNT_PST_ID = '0'-->
+        <!--		CONNECT BY NOCYCLE PRIOR PST_ID = PRNT_PST_ID -->
+        Order by pst.upd_dt desc
+    </select>
+
+    <select id="selectComCdByPrntCdString" resultMap="AdmComCdVOMap" parameterType="map">
+        select /** mcm.CommonCode.selectComCdByPrntCd */
+            concat(ADM_COM_CD.PRNT_CD, ADM_COM_CD.COM_CD) as COM_CD,
+            ADM_COM_CD.PRNT_CD,
+            ADM_COM_CD.CD_NM,
+            ADM_COM_CD.CD_SHRT_NM,
+            ADM_COM_CD.IMG_URL
+        from   ADM_COM_CD
+        where  PRNT_CD = #{prntCd}
+          and (USE_FLG IS NULL OR UPPER(USE_FLG) = 'Y')
+          and (DELT_STS_FLG IS NULL OR UPPER(DELT_STS_FLG) != 'Y')
+        order by ADM_COM_CD.ORD_BY_NO ASC
+    </select>
+
+    <insert id="insert" parameterType="AdmNtfcRcpntVO">
+        insert  /** AdmNtfcRcpnt.insert */
+        into ADM_NTFC_RCPNT(
+            PST_ID,
+            USR_ID,
+            READ_FLG,
+            cre_usr_id, cre_dt, upd_usr_id, upd_dt
+        )
+        values(
+                  #{pstId},
+                  #{usrId},
+                  #{readFlg},
+                  #{createUser}, sysdate, #{updateUser}, sysdate
+              )
+    </insert>
+
+    <resultMap type="AdmUsrVO" id="AdmUsrMap">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="usrEml" column="USR_EML" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+    </resultMap>
+
+    <select id="selectUserList" resultMap="AdmUsrMap">
+        select 	/** BoardManagement.selectUserList */
+            USR_ID,
+            USR_NM,
+            USR_EML,
+            CO_CD
+        from	ADM_USR
+        where	ACT_FLG = 'Y'
+    </select>
+
+    <select id="selectUserInfoListBelongToCompanyCode" resultMap="AdmUsrMap" parameterType="String">
+        select 	/** BoardManagement.selectUserInfoListBelongToCompanyCode */
+            distinct USR.USR_ID,
+                     USR.USR_NM,
+                     USR.USR_EML,
+                     CO.CO_CD
+        from	ADM_USR USR, ADM_CO CO
+        where	1 = 1
+          and		CO.CO_CD = USR.CO_CD
+          and		CO.CO_CD = #{coCd}
+          and		USR.ACT_FLG = 'Y'
+    </select>
+
+    <select id="selectUserInfoListBelongToTeamId" resultMap="AdmUsrMap" parameterType="String">
+        select 	/** BoardManagement.selectUserInfoListBelongToTeamId */
+            distinct USR.USR_ID,
+                     USR.USR_NM,
+                     USR.USR_EML,
+                     USR.CO_CD
+        from	ADM_USR USR, ADM_TEAM_USR TEAM
+        where	1 = 1
+          and		TEAM.USR_ID = USR.USR_ID
+          and		TEAM.TEAM_ID in
+                     (
+                         select TEAM_ID
+                         from
+                             (
+                                 select TEAM_ID from ADM_TEAM where TEAM_ID = #{teamId} and DELT_STS_FLG = 'N'
+                             )
+                         union all
+                         (
+                             select TEAM_ID from ADM_TEAM where DELT_STS_FLG = 'N'
+                                 Start With PRNT_TEAM_ID = #{teamId}
+                             CONNECT BY NOCYCLE PRIOR TEAM_ID = PRNT_TEAM_ID
+                         )
+                     )
+          and		USR.ACT_FLG = 'Y'
+    </select>
+
+    <select id="selectUserInfoListBelongToProjectId" resultMap="AdmUsrMap" parameterType="String">
+        /** BoardManagement.selectUserInfoListBelongToProjectId */
+        select
+            distinct USR.USR_ID,
+                     USR.USR_NM,
+                     USR.USR_EML,
+                     USR.CO_CD
+        from	ADM_USR USR, ADM_PJT_USR PJT
+        where	1 = 1
+          and		PJT.USR_ID = USR.USR_ID
+          and		PJT.PJT_ID in
+                     (
+                         select PJT_ID
+                         from
+                             (
+                                 select PJT_ID from ADM_PJT where pjt_tp_cd='ADM_PJT_TPPJT' and use_flg='Y' and PJT_ID = #{pjtId}
+                             )
+                         union all
+                         (
+                             select PJT_ID from ADM_PJT where pjt_tp_cd='ADM_PJT_TPPJT' and use_flg='Y'
+                                 Start With PRNT_PJT_ID = #{pjtId}
+                             CONNECT BY NOCYCLE PRIOR PJT_ID = PRNT_PJT_ID
+                         )
+                     )
+          and		USR.ACT_FLG = 'Y'
+    </select>
+
+    <resultMap type="PimTpcVO" id="PimTpcMap">
+        <result property="tpcId" column="TPC_ID" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="tpcTpCd" column="TPC_TP_CD" javaType="String"/>
+        <result property="tpcUrl" column="TPC_URL" javaType="String"/>
+        <result property="tpcNm" column="TPC_NM" javaType="String"/>
+        <result property="prntTpcId" column="PRNT_TPC_ID" javaType="String"/>
+        <result property="deltFlg" column="DELT_FLG" javaType="String"/>
+        <result property="objId" column="OBJ_ID" javaType="String"/>
+        <result property="objTblNm" column="OBJ_TBL_NM" javaType="String"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+    </resultMap>
+
+    <select id="selectByKey" resultMap="PimTpcMap" parameterType="PimTpcVO">
+        select 	/** PimTpc.selectByKey */
+            TPC_ID,
+            CO_CD,
+            TPC_TP_CD,
+            TPC_URL,
+            TPC_NM,
+            PRNT_TPC_ID,
+            DELT_FLG,
+            OBJ_ID,
+            OBJ_TBL_NM,
+            cre_usr_id, cre_dt, upd_usr_id, upd_dt
+        from	PIM_TPC
+        where	1 = 1
+          and		TPC_ID = #{tpcId}
+    </select>
+
+    <select id="selectTopicListBelongToTopicType" resultMap="PimTpcMap" parameterType="map">
+        select 	/** BoardManagement.selectTopicListBelongToTopicType */
+            TPC_ID,
+            CO_CD,
+            TPC_NM,
+            TPC_TP_CD,
+            TPC_URL,
+            PRNT_TPC_ID,
+            DELT_FLG,
+            OBJ_ID
+        from	PIM_TPC
+        where	1 = 1
+          and		TPC_TP_CD = #{tpcTpCd}
+          and		DELT_FLG = #{deltFlg}
+    </select>
+
+    <select id="selectChildTopicList" resultMap="PimTpcMap" parameterType="map">
+        select 	/** BoardManagement.selectChildTopicList */
+            TPC_ID,
+            CO_CD,
+            TPC_NM,
+            TPC_TP_CD,
+            TPC_URL,
+            PRNT_TPC_ID,
+            DELT_FLG,
+            OBJ_ID
+        from	PIM_TPC
+        where	1 = 1
+          and		PRNT_TPC_ID = #{prntTpcId}
+          and		DELT_FLG = #{deltFlg}
+    </select>
+
+    <select id="selectTopicInfo" resultMap="PimTpcMap" parameterType="hashmap">
+        select 	/** BoardManagement.selectTopicInfo */
+            TPC_ID,
+            CO_CD,
+            TPC_NM,
+            TPC_TP_CD,
+            TPC_URL,
+            PRNT_TPC_ID,
+            DELT_FLG,
+            OBJ_ID
+        from	PIM_TPC
+        where	1 = 1
+          and		TPC_TP_CD = #{tpcTpCd}
+          and		DELT_FLG = #{deltFlg}
+          and		OBJ_ID = #{objId}
+    </select>
+
+    <insert id="insertNewPost" parameterType="PimPstVO">
+        insert /** PimPst.insert */
+        into PIM_PST(
+        TPC_ID,
+        PST_ID,
+        <if test="cmtNo != null ">
+            CMT_NO,
+        </if>
+        <if test="likeNo != null ">
+            LIKE_NO,
+        </if>
+        <if test="pstCtnt != null ">
+            PST_CTNT,
+        </if>
+        <if test="deltFlg != null ">
+            DELT_FLG,
+        </if>
+
+        <if test="objId != null ">
+            OBJ_ID,
+        </if>
+        <if test="usrId != null ">
+            USR_ID,
+        </if>
+        <if test="objTblNm != null ">
+            OBJ_TBL_NM,
+        </if>
+        <if test="readFlg != null ">
+            READ_FLG,
+        </if>
+        <if test="prntPstId != null ">
+            PRNT_PST_ID,
+        </if>
+        <if test="pstTitNm != null ">
+            PST_TIT_NM,
+        </if>
+        <if test="pstTpCd != null ">
+            PST_TP_CD,
+        </if>
+        <if test="taskId != null ">
+            TASK_ID,
+        </if>
+        cre_usr_id, cre_dt, upd_usr_id, upd_dt
+        )
+        values(
+        #{tpcId},
+        #{pstId},
+        <if test="cmtNo != null ">
+            #{cmtNo},
+        </if>
+        <if test="likeNo != null ">
+            #{likeNo},
+        </if>
+        <if test="pstCtnt != null ">
+            #{pstCtnt},
+        </if>
+        <if test="deltFlg != null ">
+            #{deltFlg},
+        </if>
+        <if test="objId != null ">
+            #{objId},
+        </if>
+        <if test="usrId != null ">
+            #{usrId},
+        </if>
+        <if test="objTblNm != null ">
+            #{objTblNm},
+        </if>
+        <if test="readFlg != null ">
+            #{readFlg},
+        </if>
+        <if test="prntPstId != null ">
+            #{prntPstId},
+        </if>
+        <if test="pstTitNm != null ">
+            #{pstTitNm},
+        </if>
+        <if test="pstTpCd != null ">
+            #{pstTpCd},
+        </if>
+        <if test="taskId != null ">
+            #{taskId},
+        </if>
+        #{createUser}, sysdate, #{updateUser}, sysdate
+        )
+    </insert>
+
+    <update id="updatePostInfo" parameterType="hashMap">
+        update /** BoardManagement.updatePostInfo */
+        ADM_NTFC_RCPNT set
+        <if test="readFlg != null and readFlg != ''">
+            READ_FLG = #{readFlg},
+        </if>
+        <if test="updateUser != null and updateUser != ''">
+            upd_usr_id = #{updateUser},
+        </if>
+        upd_dt = sysdate
+        where 1 = 1
+        <if test="usrId != null and usrId != ''">
+            and USR_ID = #{usrId}
+        </if>
+        and PST_ID = #{pstId}
+    </update>
+
+    <update id="updateContentInfo" parameterType="hashMap">
+        update /** BoardManagement.updateContentInfo */
+        PIM_PST set
+        <if test="readFlg != null and readFlg != ''">
+            READ_FLG = #{readFlg},
+        </if>
+        <if test="updateUser != null and updateUser != ''">
+            upd_usr_id = #{updateUser},
+        </if>
+        <if test="pstTitNm != null and pstTitNm != ''">
+            PST_TIT_NM = #{pstTitNm},
+        </if>
+        <if test="pstCtnt != null and pstCtnt != ''">
+            PST_CTNT = #{pstCtnt},
+        </if>
+        upd_dt = sysdate
+        where 1 = 1
+        and USR_ID = #{updateUser}
+        and PST_ID = #{pstId}
+    </update>
+
+    <update id="updateTopicInfo" parameterType="map">
+        update /** BoardManagement.updateTopicInfo */
+        PIM_TPC set
+        <if test="tpcNm != null and tpcNm != ''">
+            TPC_NM = #{tpcNm},
+        </if>
+        upd_usr_id = #{updateUser},
+        <if test="deltFlg != null and deltFlg != ''">
+            DELT_FLG = #{deltFlg},
+        </if>
+        upd_dt = sysdate
+        where 1 = 1
+        and TPC_ID = #{tpcId}
+    </update>
+
+    <update id="deletePostInfo" parameterType="hashMap">
+        update  /** BoardManagement.deletePostInfo */
+            PIM_PST set
+                        DELT_FLG = #{deltFlg},
+                        upd_usr_id = #{updateUser},
+                        upd_dt = sysdate
+        where	1 = 1
+          and		PST_ID = #{pstId}
+          and		TPC_ID = #{tpcId}
+    </update>
+
+    <resultMap type="AdmTeamVO" id="AdmTeamMap">
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="prntTeamId" column="PRNT_TEAM_ID" javaType="String"/>
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+    </resultMap>
+
+    <select id="selectTeamList" resultMap="AdmTeamMap" parameterType="map">
+        select 	/** BoardManagement.selectTeamList */
+            TEAM_ID,
+            PRNT_TEAM_ID,
+            TEAM_NM,
+            CO_CD
+        from	ADM_TEAM
+        where	1 = 1
+          and		CO_CD = #{coCd}
+          and		DELT_STS_FLG = #{deltFlg}
+            Start With TEAM_ID in (select TEAM_ID from ADM_TEAM where PRNT_TEAM_ID = '0' and CO_CD = #{coCd} and	DELT_STS_FLG = #{deltFlg})
+        CONNECT BY NOCYCLE PRIOR TEAM_ID = PRNT_TEAM_ID
+    </select>
+
+    <update id="updateTopicNameAndPosition"  parameterType="map">
+        update  /** BoardManagement.updateTopicNameAndPosition */
+            PIM_TPC set
+                        TPC_NM = #{tpcNm},
+                        PRNT_TPC_ID = #{prntTpcId},
+                        upd_usr_id = #{updateUser},
+                        upd_dt = sysdate
+        where	1 = 1
+          and		TPC_ID = #{tpcId}
+          and		TPC_TP_CD = #{tpcTpCd}
+    </update>
+
+    <update id="updateTopicInfoList"  parameterType="map">
+        update  /* BoardManagement.updateTopicInfoList */
+        PIM_TPC set
+        DELT_FLG = #{deltFlg},
+        upd_usr_id = #{updateUser},
+        upd_dt = sysdate
+        where	1 = 1
+        and		TPC_ID in
+        <foreach collection="tpcIdLst" item="item" separator="," close=")" open="(">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updatePostInfoList" parameterType="map">
+        update  /** BoardManagement.updatePostInfoList */
+        PIM_PST set
+        DELT_FLG = #{deltFlg},
+        upd_usr_id = #{updateUser},
+        upd_dt = sysdate
+        where	1 = 1
+        and		TPC_ID in
+        <foreach collection="tpcIdLst" item="item" separator="," close=")" open="(">
+            #{item}
+        </foreach>
+    </update>
+
+    <resultMap type="AdmPjtVO" id="AdmPjtMap">
+        <result property="pjtId" column="PJT_ID" javaType="String"/>
+        <result property="prntPjtId" column="PRNT_PJT_ID" javaType="String"/>
+        <result property="pjtNm" column="PJT_NM" javaType="String"/>
+    </resultMap>
+
+    <select id="selectProjectList" resultMap="AdmPjtMap"  parameterType="hashmap">
+        select 	/** BoardManagement.selectProjectList */
+            PJT_ID,
+            PRNT_PJT_ID,
+            PJT_NM
+        from	ADM_PJT
+        where	1 = 1
+          and		PJT_TP_CD = #{pjtTpCd}
+          and		USE_FLG = #{useFlg}
+            Start With PJT_ID in (select PJT_ID from ADM_PJT where PRNT_PJT_ID='0' and PJT_TP_CD = #{pjtTpCd} and USE_FLG = #{useFlg})
+        CONNECT BY NOCYCLE PRIOR PJT_ID = PRNT_PJT_ID
+    </select>
+
+    <select id="selectTopicId" resultType="string" parameterType="map">
+        select /** BoardManagement.selectTopicId */
+        TPC_ID
+        from PIM_TPC
+        where 1=1
+        and	PRNT_TPC_ID = #{prntTpcId}
+        and	TPC_NM = #{tpcNm}
+        <if test="tpcId != ''">
+            and	TPC_ID != #{tpcId}
+        </if>
+        and DELT_FLG = #{deltFlg}
+    </select>
+
+    <update id="updateReadFlgPost" parameterType="hashMap">
+        update  /** AdmNtfcRcpnt.updateWithMap */
+            ADM_NTFC_RCPNT set
+                               PST_ID = #{pstId},
+                               USR_ID = #{usrId},
+                               READ_FLG = #{readFlg},
+                               upd_usr_id = #{updateUser},
+                               upd_dt = sysdate
+        where	1 = 1
+          and		PST_ID = #{pstId}
+          and		USR_ID = #{usrId}
+    </update>
+
+    <resultMap id="listForum" type="PostVO">
+        <result property="pstId" column="PST_ID"/>
+        <result property="usrId" column="USR_ID"/>
+        <result property="usrNm" column="USR_NM"/>
+        <result property="urlImg" column="IMG_URL"/>
+        <result property="pstCtnt" column="PST_CTNT"/>
+        <result property="updateDate" column="UPD_DT" javaType="String"/>
+        <result property="tpcId" column="TPC_ID"/>
+        <result property="pstTpCd" column="PST_TP_CD"/>
+        <result property="pjtId" column="PJT_ID"/>
+        <result property="subPjtId" column="SUB_PJT_ID"/>
+        <result property="objId" column="OBJ_ID"/>
+        <result property="prntPstId" column="PRNT_PST_ID"/>
+        <result property="cateNtc" column="CATENTC"/>
+        <result property="readFlg" column="READ_FLG"/>
+        <result property="pstTitNm" column="PST_TIT_NM"/>
+        <result property="reqId" column="REQ_ID"/>
+        <result property="reqPhsCd" column="REQ_PHS_CD"/>
+        <result property="objParaCtnt" column="OBJ_PARA_CTNT"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="wradFlg" column="WRAD_FLG"/>
+    </resultMap>
+
+    <select id="selectNotificationByPstId" resultMap="listForum">
+        /** BoardManagement.selectNotificationByPstId */
+        WITH TBL_PJT AS (
+        SELECT PJT.PJT_ID,
+        SYS_CONNECT_BY_PATH(PJT.PJT_NM, ' ▶ ') PJT_PATH
+        FROM ADM_PJT PJT
+        WHERE 1 =1
+        AND PJT.USE_FLG = 'Y'
+        AND PJT.PJT_TP_CD                     <![CDATA[<>]]> 'ADM_PJT_TPMNU'
+        START WITH PJT.PRNT_PJT_ID ='0'
+        CONNECT BY NOCYCLE PRIOR PJT.PJT_ID = PRNT_PJT_ID
+        ),
+        TBL_TPC AS
+        (
+        SELECT TPC.TPC_ID,
+        SYS_CONNECT_BY_PATH(TPC.TPC_NM, ' ▶ ') TPC_PATH
+        FROM PIM_TPC TPC
+        WHERE 1 =1
+        START WITH TPC.PRNT_TPC_ID IN ('CMP','PJT','BLG')
+        CONNECT BY NOCYCLE PRIOR TPC.TPC_ID = PRNT_TPC_ID
+        )
+        SELECT
+        (
+        CASE
+        WHEN DECODE(PJT.PJT_PATH ,NULL, TPC.TPC_PATH,PJT.PJT_PATH) IS NULL AND PST.TPC_ID = 'BRD_TP_CDTAT'
+        THEN ' ▶ Blue Print ▶ Attendance'
+        WHEN DECODE(PJT.PJT_PATH ,NULL, TPC.TPC_PATH,PJT.PJT_PATH) IS NULL AND PST.TPC_ID = 'BRD_TP_CDSHF'
+        THEN ' ▶ Blue Print ▶ Shift Registry'
+        ELSE DECODE(PJT.PJT_PATH, NULL, TPC.TPC_PATH,PJT.PJT_PATH)
+        END
+        )
+        CATENTC,
+        PST.PST_ID,
+        PST.TPC_ID,
+        PST.PST_TP_CD,
+        TO_CHAR(PST.UPD_DT, 'YYYY-Mon-DD HH24:MI') UPD_DT,
+        NVL(pst.pst_ctnt,pst.pst_tit_nm) PST_CTNT,
+        RCPNT.USR_ID,
+        PST.OBJ_ID,
+        PST.OBJ_TBL_NM,
+        RCPNT.READ_FLG,
+        PST.PRNT_PST_ID,
+        USR.USR_NM,
+        USR.IMG_URL,
+        USR.USR_ID CRE_USR_ID,
+        REQ.PJT_ID,
+        REQ.SUB_PJT_ID,
+        PST.PST_TIT_NM,
+        REQ.REQ_ID,
+        REQ.WRAD_FLG,
+        REQ.REQ_PHS_CD,
+        PST.OBJ_PARA_CTNT
+        FROM ADM_NTFC_RCPNT RCPNT,
+        PIM_PST PST,
+        ADM_USR USR,
+        PIM_REQ REQ,
+        TBL_PJT PJT,
+        TBL_TPC TPC
+        WHERE 1=1
+        AND (PST.PST_TP_CD = 'BRD_TP_CDFRM' OR PST.TPC_ID = 'BRD_TP_CDTAT' OR PST.TPC_ID = 'BRD_TP_CDSHF' OR PST.PST_TP_CD = 'BRD_TP_CDNTCWAT' OR pst.pst_tp_cd = 'PST_TP_CDCMT'
+        OR pst.pst_tp_cd = 'PST_TP_CDACT'
+        OR pst.pst_tp_cd = 'PST_TP_CDSM'
+        OR pst.pst_tp_cd = 'PST_TP_CDFB' )
+        <if test="readFlag != S">
+            AND RCPNT.USR_ID = #{usrId}
+        </if>
+        AND RCPNT.PST_ID = PST.PST_ID
+        AND RCPNT.CRE_USR_ID = USR.USR_ID
+        AND PST.OBJ_ID = REQ.REQ_ID(+)
+        AND REQ.CATE_ID = PJT.PJT_ID(+)
+        AND PST.TPC_ID = TPC.TPC_ID(+)
+        <if test="usrId != null and usrId != ''">
+            AND RCPNT.USR_ID = #{usrId}
+        </if>
+        <if test="pstId != null and pstId != ''">
+            AND PST.PST_ID = #{pstId}
+        </if>
+        <if test="updateUsrId != null and updateUsrId != ''">
+            AND RCPNT.UPD_USR_ID = #{updateUsrId}
+        </if>
+        order by PST.UPD_DT desc
+    </select>
+
+    <resultMap id="NoticeVo" type="PostVO">
+        <result property="tpcId" column="TPC_ID" javaType="String"/>
+        <result property="pstId" column="PST_ID" javaType="String"/>
+        <result property="cmtNo" column="CMT_NO" javaType="Integer"/>
+        <result property="likeNo" column="LIKE_NO" javaType="Integer"/>
+        <result property="pstCtnt" column="PST_CTNT" javaType="String"/>
+        <result property="deltFlg" column="DELT_FLG" javaType="String"/>
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="urlImg" column="IMG_URL" javaType="String"/>
+        <result property="readFlg" column="READ_FLG" javaType="String"/>
+        <result property="prntPstId" column="PRNT_PST_ID" javaType="String"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+        <result property="upddtForSoft" column="upddtForSoft"/>
+        <result property="tpcNm" column="TPC_NM" javaType="String"/>
+        <result property="subBrdTpCd" column="SUB_BRD_TP_CD" javaType="String"/>
+        <result property="pstTitNm" column="PST_TIT_NM" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="cateNtc" column="CATE_NTC" javaType="String"/>
+        <result property="read_flgN" column="READ_FLGN" javaType="Int"/>
+        <result property="read_flgY" column="READ_FLGY" javaType="Int"/>
+        <result property="read_flgS" column="READ_FLGS" javaType="Int"/>
+    </resultMap>
+
+    <select id="selectPostListBelongToCompanyByPst" resultMap="NoticeVo" parameterType="map">
+        /** BoardManagement.selectPostListBelongToCompany */
+        With TPC as ( SELECT TPC_ID, TPC_NM, SYS_CONNECT_BY_PATH(TPC_NM, ' ▶ ') CATE_NTC
+        FROM PIM_TPC
+        START WITH PRNT_TPC_ID = 'CMP'
+        CONNECT BY NOCYCLE PRIOR TPC_ID = PRNT_TPC_ID
+        )
+        select
+        PST.TPC_ID,
+        PST.PST_ID,
+        PST.CMT_NO,
+        PST.LIKE_NO,
+        PST.PST_CTNT,
+        PST.DELT_FLG,
+        RCPNT.USR_ID,
+        (Select IMG_URL from ADM_USR where USR_ID = PST.USR_ID) IMG_URL,
+        RCPNT.READ_FLG,
+        PST.PRNT_PST_ID,
+        PST.cre_usr_id,
+        to_char(PST.cre_dt, 'YYYY-Mon-DD HH24:MI') cre_dt,
+        PST.upd_usr_id,
+        to_char(PST.upd_dt, 'YYYY-MM-DD HH24:MI') upd_dt,
+        to_char(PST.upd_dt, 'YYYY-MM-DD HH24:MI') upddtForSoft,
+        TPC.TPC_NM,
+        'BRD_TP_CDNTCPJT' as SUB_BRD_TP_CD,
+        PST_TIT_NM,
+        (select USR_NM from ADM_USR USR where USR.USR_ID = PST.USR_ID) USR_NM,
+        TPC.CATE_NTC CATE_NTC,
+        (select count(USR.USR_ID) from ADM_USR USR , ADM_NTFC_RCPNT NTFC where 1 = 1 AND USR.USR_ID = NTFC.USR_ID AND
+        USR.ACT_FLG = 'Y' AND ntfc.read_flg ='N' AND NTFC.PST_ID = PST.PST_ID) AS READ_FLGN,
+        (select count(USR.USR_ID) from ADM_USR USR , ADM_NTFC_RCPNT NTFC where 1 = 1 AND USR.USR_ID = NTFC.USR_ID AND
+        USR.ACT_FLG = 'Y' AND ntfc.read_flg ='Y' AND NTFC.PST_ID = PST.PST_ID) AS READ_FLGY,
+        (select count(USR.USR_ID) from ADM_USR USR , ADM_NTFC_RCPNT NTFC where 1 = 1 AND USR.USR_ID = NTFC.USR_ID AND
+        USR.ACT_FLG = 'Y' AND NTFC.PST_ID = PST.PST_ID) AS READ_FLGS
+        from PIM_PST PST, ADM_NTFC_RCPNT RCPNT, TPC
+        where PST.TPC_ID in (
+        select TPC_ID from PIM_TPC where TPC_TP_CD in
+        <foreach open="(" separator="," close=")" collection="tpcTpCdLst" item="list" index="index">
+            #{list}
+        </foreach>
+        )
+        and PST.DELT_FLG = 'N'
+        and PST.PST_ID = RCPNT.PST_ID
+        and RCPNT.USR_ID = #{usrId}
+        and PST.PST_TP_CD = #{brdTpCd}
+        AND TPC.TPC_ID = PST.TPC_ID
+        AND RCPNT.PST_ID  = #{pstId}
+        order by PST.UPD_DT desc
+    </select>
+
+    <select id="selectPostListBelongToCompanyByPstDel" resultMap="NoticeVo" parameterType="map">
+        /** BoardManagement.selectPostListBelongToCompany */
+        With TPC as ( SELECT TPC_ID, TPC_NM, SYS_CONNECT_BY_PATH(TPC_NM, ' ▶ ') CATE_NTC
+        FROM PIM_TPC
+        START WITH PRNT_TPC_ID = 'CMP'
+        CONNECT BY NOCYCLE PRIOR TPC_ID = PRNT_TPC_ID
+        )
+        select
+        PST.TPC_ID,
+        PST.PST_ID,
+        PST.CMT_NO,
+        PST.LIKE_NO,
+        PST.PST_CTNT,
+        PST.DELT_FLG,
+        RCPNT.USR_ID,
+        (Select IMG_URL from ADM_USR where USR_ID = PST.USR_ID) IMG_URL,
+        RCPNT.READ_FLG,
+        PST.PRNT_PST_ID,
+        PST.cre_usr_id,
+        to_char(PST.cre_dt, 'YYYY-Mon-DD HH24:MI') cre_dt,
+        PST.upd_usr_id,
+        to_char(PST.upd_dt, 'YYYY-MM-DD HH24:MI') upd_dt,
+        to_char(PST.upd_dt, 'YYYY-MM-DD HH24:MI') upddtForSoft,
+        TPC.TPC_NM,
+        'BRD_TP_CDNTCPJT' as SUB_BRD_TP_CD,
+        PST_TIT_NM,
+        (select USR_NM from ADM_USR USR where USR.USR_ID = PST.USR_ID) USR_NM,
+        TPC.CATE_NTC CATE_NTC,
+        (select count(USR.USR_ID) from ADM_USR USR , ADM_NTFC_RCPNT NTFC where 1 = 1 AND USR.USR_ID = NTFC.USR_ID AND
+        USR.ACT_FLG = 'Y' AND ntfc.read_flg ='N' AND NTFC.PST_ID = PST.PST_ID) AS READ_FLGN,
+        (select count(USR.USR_ID) from ADM_USR USR , ADM_NTFC_RCPNT NTFC where 1 = 1 AND USR.USR_ID = NTFC.USR_ID AND
+        USR.ACT_FLG = 'Y' AND ntfc.read_flg ='Y' AND NTFC.PST_ID = PST.PST_ID) AS READ_FLGY,
+        (select count(USR.USR_ID) from ADM_USR USR , ADM_NTFC_RCPNT NTFC where 1 = 1 AND USR.USR_ID = NTFC.USR_ID AND
+        USR.ACT_FLG = 'Y' AND NTFC.PST_ID = PST.PST_ID) AS READ_FLGS
+        from PIM_PST PST, ADM_NTFC_RCPNT RCPNT, TPC
+        where PST.TPC_ID in (
+        select TPC_ID from PIM_TPC where TPC_TP_CD in
+        <foreach open="(" separator="," close=")" collection="tpcTpCdLst" item="list" index="index">
+            #{list}
+        </foreach>
+        )
+        and PST.PST_ID = RCPNT.PST_ID
+        and RCPNT.USR_ID = #{usrId}
+        and PST.PST_TP_CD = #{brdTpCd}
+        AND TPC.TPC_ID = PST.TPC_ID
+        AND RCPNT.PST_ID  = #{pstId}
+        order by PST.UPD_DT desc
+    </select>
+
+    <select id="selectPostListBelongToGeneral" resultMap="NoticeVo" parameterType="hashMap">
+        /** BoardManagement.selectPostListBelongToGeneral */
+        <!--
+        With TPC as ( SELECT TPC_ID, TPC_NM, SYS_CONNECT_BY_PATH(TPC_NM, ' ▶ ') CATE_NTC
+                      FROM
+                        (SELECT TPC_ID,
+                          PRNT_TPC_ID,
+                          TPC_NM
+                        FROM
+                          (SELECT COM_cd AS TPC_ID,
+                            PRNT_CD PRNT_TPC_ID,
+                            CD_NM TPC_NM
+                          FROM ADM_COM_CD
+                          WHERE PRNT_CD || COM_CD = #{subBrdTpCd}
+                          )
+                        UNION ALL
+                          (SELECT TPC_ID,
+                            PRNT_TPC_ID,
+                            TPC_NM
+                          FROM PIM_TPC
+                            START WITH PRNT_TPC_ID          = 'GEN'
+                            CONNECT BY NOCYCLE PRIOR TPC_ID = PRNT_TPC_ID
+                          )
+                        )
+                        START WITH PRNT_TPC_ID          = #{brdTpCd}
+                        CONNECT BY NOCYCLE PRIOR TPC_ID = PRNT_TPC_ID
+                      )
+         -->
+        With TPC as ( SELECT TPC_ID, TPC_NM, SYS_CONNECT_BY_PATH(TPC_NM, ' ▶ ') CATE_NTC
+        FROM PIM_TPC
+        START WITH PRNT_TPC_ID          = 'GEN'
+        CONNECT BY NOCYCLE PRIOR TPC_ID = PRNT_TPC_ID
+        )
+        select
+
+        PST.TPC_ID,
+        PST.PST_ID,
+        PST.CMT_NO,
+        PST.LIKE_NO,
+        PST.PST_CTNT,
+        PST.DELT_FLG,
+        PST.USR_ID,
+        (Select IMG_URL from ADM_USR where USR_ID = PST.USR_ID) IMG_URL,
+        RCPNT.READ_FLG,
+        PST.PRNT_PST_ID,
+        PST.cre_usr_id,
+        to_char(PST.cre_dt, 'YYYY-Mon-DD HH24:MI') cre_dt,
+        PST.upd_usr_id,
+        <!-- 				case when RCPNT.READ_FLG = 'N' then '<![CDATA[<]]>B<![CDATA[>]]>' || to_char(PST.upd_dt, 'YYYY-Mon-DD HH24:MI') || '<![CDATA[<]]>/B<![CDATA[>]]>' -->
+        <!-- 				else to_char(PST.upd_dt, 'YYYY-Mon-DD HH24:MI') -->
+        <!-- 				end upd_dt, -->
+        <!-- 				case when RCPNT.READ_FLG = 'N' then '<![CDATA[<]]>B<![CDATA[>]]>' || to_char(PST.upd_dt, 'YYYY-MM-DD HH24:MI') || '<![CDATA[<]]>/B<![CDATA[>]]>' -->
+        <!-- 				else to_char(PST.upd_dt, 'YYYY-MM-DD HH24:MI') -->
+        <!-- 				end upddtForSoft, -->
+        <!-- 				TPC.TPC_NM, -->
+        <!-- 				'BRD_TP_CDNTCPJT' as SUB_BRD_TP_CD, -->
+        <!-- 				case when RCPNT.READ_FLG = 'N' then '<![CDATA[<]]>B<![CDATA[>]]>' || PST_TIT_NM || '<![CDATA[<]]>/B<![CDATA[>]]>' -->
+        <!-- 				else PST_TIT_NM -->
+        <!-- 				end PST_TIT_NM, -->
+        <!-- 				case when RCPNT.READ_FLG = 'N' then '<![CDATA[<]]>B<![CDATA[>]]>' || (select USR_NM from ADM_USR USR where USR.USR_ID = PST.USR_ID) || '<![CDATA[<]]>/B<![CDATA[>]]>' -->
+        <!-- 				else (select USR_NM from ADM_USR USR where USR.USR_ID = PST.USR_ID) -->
+        <!-- 				end USR_NM, -->
+        <!-- 				case when RCPNT.READ_FLG = 'N' then '<![CDATA[<]]>B<![CDATA[>]]>' || TPC.CATE_NTC || '<![CDATA[<]]>/B<![CDATA[>]]>' -->
+        <!-- 				else TPC.CATE_NTC -->
+        <!-- 				end as CATE_NTC -->
+        <!-- oanh.tran bug:2223 Ngay :31/8/2015  -->
+        to_char(PST.upd_dt, 'YYYY-MM-DD HH24:MI') upd_dt,
+        <!-- End -->
+        to_char(PST.upd_dt, 'YYYY-MM-DD HH24:MI') upddtForSoft,
+        TPC.TPC_NM,
+        'BRD_TP_CDNTCPJT' as SUB_BRD_TP_CD,
+        PST_TIT_NM,
+        (select USR_NM from ADM_USR USR where USR.USR_ID = PST.USR_ID) USR_NM,
+        TPC.CATE_NTC CATE_NTC,
+        <!-- oanh.tran bug: 2214 Ngay :21/8/2015 - update :1/9/2015-->
+        (select count(USR.USR_ID) from   ADM_USR USR , ADM_NTFC_RCPNT NTFC where 1 = 1 AND USR.USR_ID = NTFC.USR_ID AND USR.ACT_FLG = 'Y' AND ntfc.read_flg ='N' AND NTFC.PST_ID = PST.PST_ID) AS READ_FLGN,
+        (select count(USR.USR_ID) from   ADM_USR USR , ADM_NTFC_RCPNT NTFC where 1 = 1 AND USR.USR_ID = NTFC.USR_ID AND USR.ACT_FLG = 'Y' AND ntfc.read_flg ='Y' AND NTFC.PST_ID = PST.PST_ID) AS READ_FLGY,
+        (select count(USR.USR_ID) from   ADM_USR USR , ADM_NTFC_RCPNT NTFC where 1 = 1 AND USR.USR_ID = NTFC.USR_ID AND USR.ACT_FLG = 'Y' AND NTFC.PST_ID = PST.PST_ID) AS READ_FLGS
+        <!--End -->
+        from	PIM_PST PST, ADM_NTFC_RCPNT	RCPNT, TPC
+        where PST.TPC_ID in (
+        SELECT TPC_ID
+        FROM PIM_TPC
+        WHERE DELT_FLG = 'N'
+        START WITH TPC_ID in (
+        SELECT TPC_ID
+        FROM
+        (SELECT COM_CD
+        FROM ADM_COM_CD
+        WHERE PRNT_CD || COM_CD = #{subBrdTpCd} and DELT_STS_FLG = 'N'
+        ORDER BY ORD_BY_NO
+        ) COM, PIM_TPC
+        WHERE COM.COM_CD = PRNT_TPC_ID and PIM_TPC.DELT_FLG = 'N')
+        CONNECT BY NOCYCLE PRIOR TPC_ID = PRNT_TPC_ID
+        )
+        and PST.DELT_FLG = 'N'
+        and	PST.PST_ID = RCPNT.PST_ID
+        and RCPNT.USR_ID = #{usrId}
+        AND PST.USR_ID  &lt;&gt; 'admin' <!-- Prevent show admin's birthday. Because usr_id always = 'admin' before -->
+        <!--		and RCPNT.READ_FLG = #{readFlag}-->
+        and PST.PST_TP_CD = #{brdTpCd}
+        AND TPC.TPC_ID     = PST.TPC_ID
+        and RCPNT.upd_dt &gt; add_months(sysdate, #{limitMonth})
+        <if test="lastDate != null and lastDate != ''">
+            AND PST.UPD_DT BETWEEN TO_DATE(#{lastDate},'YYYYMMDD') AND sysdate
+            <!-- and	(To_CHAR(PST.UPD_DT, 'yyyyMMdd') BETWEEN #{lastDate} and #{currentDate}) -->
+        </if>
+        order by PST.UPD_DT desc
+        <!--		order by upd_dt desc-->
+    </select>
+
+    <select id="selectCreUsrIdByPst" resultType="String" parameterType="String">
+        select CRE_USR_ID
+        from PIM_PST
+        where 1 = 1
+          and PST_ID = #{pstId}
+    </select>
+</mapper>

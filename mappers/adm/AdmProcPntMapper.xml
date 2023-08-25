@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.AdmProcPntMapper">
+
+    <insert id="insert" parameterType="AdmProcPntVO">
+		insert  /** AdmProcPnt.insert */
+		into ADM_PROC_PNT(
+				PCT_NO,
+		<if test="pjtId != null and pjtId != ''">
+				PJT_ID,
+		</if>
+				BIZ_PROC_ID,
+				PROC_PHS_ID,
+		<if test="itrtnId != null and itrtnId != ''">
+				ITRTN_ID,
+		</if>
+				EFRT_PCT_NO,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+				)
+		values(
+				#{pctNo},
+			<if test="pjtId != null and pjtId != ''">
+				#{pjtId},
+			</if>
+				#{bizProcId},
+				#{procPhsId},
+			<if test="itrtnId != null and itrtnId != ''">
+				#{itrtnId},
+			</if>
+				#{efrtPctNo},
+				#{creUsrId}, sysdate, #{updUsrId}, sysdate
+				)
+	</insert>
+
+	<update id="update" parameterType="AdmProcPntVO">
+		update  /** AdmProcPnt.update */
+		ADM_PROC_PNT set
+		<if test="pctNo != null">
+				PCT_NO = #{pctNo},
+		</if>
+		<if test="pjtId != null and pjtId != ''">
+				PJT_ID = #{pjtId},
+		</if>
+		<if test="bizProcId != null and bizProcId != ''">
+				BIZ_PROC_ID = #{bizProcId},
+		</if>
+		<if test="procPhsId != null and procPhsId != ''">
+				PROC_PHS_ID = #{procPhsId},
+		</if>
+		<if test="itrtnId != null and itrtnId != ''">
+				ITRTN_ID = #{itrtnId},
+		</if>
+		<if test="efrtPctNo != null">
+				EFRT_PCT_NO = #{efrtPctNo},
+		</if>
+				upd_usr_id = #{updUsrId},
+				upd_dt = sysdate
+		where	1 = 1
+		and		PJT_ID = #{pjtId}
+		and		BIZ_PROC_ID = #{bizProcId}
+		and		PROC_PHS_ID = #{procPhsId}
+		and		ITRTN_ID = #{itrtnId}
+	</update>
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.AdmNtfcRcpntMapper">
+	<insert id="insert">
+		insert  /** AdmNtfcRcpnt.insert */
+		into ADM_NTFC_RCPNT(
+				PST_ID,
+				USR_ID,
+				READ_FLG,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+				)
+		values(
+				#{pstId},
+				#{usrId},
+				#{readFlg},
+				#{createUser}, sysdate, #{updateUser}, sysdate
+				)
+	</insert>
+
+	<select id="checkIsExistByIdPimPost" resultType="string">
+		select /** AdmNtfcRcpnt.checkIsExistByIdPimPost */
+			distinct nt.pst_id
+		from ADM_NTFC_RCPNT nt
+		where nt.pst_id = #{pstId}
+			and nt.usr_id = #{usrId}
+	</select>
+
+	<update id="updateReadFlg">
+		update /** AdmNtfcRcpnt.updateReadFlg */
+			ADM_NTFC_RCPNT nt
+			set nt.READ_FLG = #{readFlg},
+				<!-- nt.upd_dt = sysdate, -->
+				upd_usr_id = #{updateUser}
+		where nt.pst_id = #{pstId}
+			and nt.usr_id = #{usrId}
+	</update>
+</mapper>

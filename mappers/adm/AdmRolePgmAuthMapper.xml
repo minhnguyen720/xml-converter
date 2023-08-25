@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.AdmRolePgmAuthMapper">
+
+	<resultMap id="AdmRolePgmAuthMap" type="AdmRolePgmAuthVO">
+		<result property="mnuPgmId" column="MNU_PGM_ID" javaType="String"/>
+		<result property="roleId" column="ROLE_ID" javaType="String"/>
+		<result property="createUser" column="cre_usr_id"/>
+		<result property="updateUser" column="upd_usr_id"/>
+		<result property="createDate" column="cre_dt"/>
+		<result property="updateDate" column="upd_dt"/>
+	</resultMap>
+	<select id="selectByKey" parameterType="AdmRolePgmAuthVO" resultMap="AdmRolePgmAuthMap">
+		select 	/** qms.AdmRolePgmAuth.selectByKey */
+				MNU_PGM_ID,
+				ROLE_ID,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+		from	ADM_ROLE_PGM_AUTH
+		where	1 = 1
+		and		MNU_PGM_ID = #{mnuPgmId}
+		and		ROLE_ID = #{roleId}
+	</select>
+	<select id="selectAll" resultMap="AdmRolePgmAuthMap">
+		select 	/** qms.AdmRolePgmAuth.selectAll */
+				MNU_PGM_ID,
+				ROLE_ID,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+		from	ADM_ROLE_PGM_AUTH
+	</select>
+	<insert id="insert" parameterType="AdmRolePgmAuthVO">
+		insert  /** qms.AdmRolePgmAuth.insert */
+		into ADM_ROLE_PGM_AUTH(
+				MNU_PGM_ID,
+				ROLE_ID,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+				)
+		values(
+				#{mnuPgmId},
+				#{roleId},
+				#{createUser}, sysdate, #{updateUser}, sysdate
+				)
+	</insert>
+	<update id="update" parameterType="AdmRolePgmAuthVO">
+		update  /** qms.AdmRolePgmAuth.update */
+		ADM_ROLE_PGM_AUTH set
+				MNU_PGM_ID = #{mnuPgmId},
+				ROLE_ID = #{roleId},
+				upd_usr_id = #{updateUser},
+				upd_dt = sysdate
+		where	1 = 1
+		and		MNU_PGM_ID = #{mnuPgmId}
+		and		ROLE_ID = #{roleId}
+	</update>
+	<update id="updateWithMap" parameterType="hashMap">
+		update  /** qms.AdmRolePgmAuth.updateWithMap */
+		ADM_ROLE_PGM_AUTH set
+		<if test="mnuPgmId != null and mnuPgmId != ''">
+			MNU_PGM_ID = #{mnuPgmId},
+		</if>
+		<if test="roleId != null and roleId != ''">
+			ROLE_ID = #{roleId},
+		</if>
+		upd_usr_id = #{updateUser},
+		upd_dt = sysdate
+		where	1 = 1
+		and		MNU_PGM_ID = #{mnuPgmId}
+		and		ROLE_ID = #{roleId}
+	</update>
+	<delete id="delete" parameterType="AdmRolePgmAuthVO">
+		delete  /** qms.AdmRolePgmAuth.delete */
+		ADM_ROLE_PGM_AUTH
+		where	1 = 1
+		and		MNU_PGM_ID = #{mnuPgmId}
+		and		ROLE_ID = #{roleId}
+	</delete>
+
+</mapper>

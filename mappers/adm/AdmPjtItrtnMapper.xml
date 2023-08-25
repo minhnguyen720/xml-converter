@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.AdmPjtItrtnMapper">
+    <insert id="insert">
+        insert /** AdmPjtItrtn.insert */
+        into ADM_PJT_ITRTN(
+        PJT_ID,
+        SVC_DSK_FLG,
+        USE_FLG,
+        ITRTN_ID,
+        <if test="ctrtId != null and ctrtId != ''">
+            CTRT_ID,
+        </if>
+        cre_usr_id, cre_dt, upd_usr_id, upd_dt
+        <if test="waFlg != null and waFlg != ''">
+            ,WRAD_FLG
+        </if>
+        )
+        values(
+        #{pjtId},
+        #{svcDskFlg},
+        #{useFlg},
+        #{itrtnId},
+        <if test="ctrtId != null and ctrtId != ''">
+            #{ctrtId},
+        </if>
+        #{createUser}, sysdate, #{updateUser}, sysdate
+        <if test="waFlg != null and waFlg != ''">
+            ,#{waFlg}
+        </if>
+        )
+    </insert>
+</mapper>

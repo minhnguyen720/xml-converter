@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.quartz.mappers.BatchMapper">
+    <resultMap id="timerInfor" type="com.dou.quartz.services.TimerInfor">
+        <result property="cron" column="CRON_XPR_VAL" />
+        <result property="jobName" column="BAT_JB_ID" />
+    </resultMap>
+
+    <resultMap id="InfoJob" type="com.dou.quartz.model.JobInforModel">
+        <result property="batchJobId" column="batchJobId" />
+        <result property="batJbNm" column="batJbNm" />
+        <result property="batJbFileNm" column="batJbFileNm" />
+        <result property="batJbStsCd" column="batJbStsCd" />
+        <result property="batJbStDt" column="batJbStDt" />
+        <result property="batJbDesc" column="batJbDesc" />
+        <result property="cronEx" column="cronEx" />
+    </resultMap>
+
+    <update id="updateBatchTimer" parameterType="map">
+        UPDATE adm_bat_jb SET CRON_XPR_VAL = #{timer}, BAT_JB_STS_CD = 'RUNNING', UPD_DT = sysdate WHERE  BAT_JB_ID = #{batchId}
+    </update>
+
+    <update id="updateStopBatchTimer" parameterType="map">
+        UPDATE adm_bat_jb SET  CRON_XPR_VAL = null, BAT_JB_STS_CD = 'STOPPING', UPD_DT = sysdate WHERE  BAT_JB_ID = #{batchId}
+    </update>
+
+    <select id="getAllJobRunning" resultMap="timerInfor">
+        select BAT_JB_ID, CRON_XPR_VAL from adm_bat_jb where BAT_JB_STS_CD = 'RUNNING'
+    </select>
+
+    <select id="getInfoJobById" resultMap="InfoJob" parameterType="map">
+        SELECT BAT_JB_ID batchJobId,
+            BAT_JB_NM batJbNm,
+            BAT_JB_FILE_NM batJbFileNm,
+            BAT_JB_STS_CD batJbStsCd,
+            BAT_JB_ST_DT batJbStDt,
+            BAT_JB_DESC batJbDesc,
+            CRON_XPR_VAL cronEx
+        FROM ADM_BAT_JB where BAT_JB_ID =#{jobId}
+    </select>
+
+	<resultMap id="AdmBatchConfigMap" type="AdmBatchConfig">
+		<result property="coCd" column="CO_CD" javaType="String"/>
+		<result property="fileFolder" column="FILE_LOC_URL"/>
+        <result property="actFlg" column="ACT_FLG"/>
+        <result property="coNm" column="CO_NM"/>
+        <result property="batchId" column="BAT_JB_ID"/>
+	</resultMap>
+
+    <select id = "getAllConfigBatch" resultMap= "AdmBatchConfigMap">
+        SELECT
+            ac.co_cd CO_CD,
+            ac.CO_NM CO_NM,
+            NVL(abc.ACT_FLG,'N') ACT_FLG,
+            abc.FILE_LOC_URL FILE_LOC_URL,
+            abc.BAT_JB_ID BAT_JB_ID
+        FROM
+            adm_bat_cfg abc,
+            adm_co ac
+        WHERE
+            1 = 1
+            AND   ac.delt_flg = 'N'
+            AND   ac.co_cd = abc.co_cd (+)
+            <!-- AND   abc.BAT_JB_ID = #{batchId} -->
+    </select>
+
+    <update id= "updateBatchConfig" parameterType = "AdmBatchConfig">
+        MERGE INTO adm_bat_cfg USING dual ON (
+            co_cd = #{coCd}
+            AND bat_jb_id = #{batchId}
+        )
+        WHEN MATCHED THEN UPDATE SET 
+            act_flg = #{actFlg},
+            FILE_LOC_URL = #{fileFolder},
+            upd_dt = SYSDATE,
+            upd_usr_id = 'admin'
+        WHEN NOT MATCHED THEN INSERT (
+            co_cd,
+            bat_jb_id,
+            act_flg,
+            FILE_LOC_URL
+        ) VALUES (
+            #{coCd},
+            #{batchId},
+            #{actFlg},
+            #{fileFolder}
+        )
+    </update>
+
+    <update id="deleteBatchConfig" parameterType="AdmBatchConfig">
+		delete  /** AdmBatchConfig.deleteBatchConfig */
+		adm_bat_cfg
+		where	1 = 1
+		AND	  co_cd = #{coCd}
+        AND   bat_jb_id = #{batchId}
+	</update>
+</mapper>

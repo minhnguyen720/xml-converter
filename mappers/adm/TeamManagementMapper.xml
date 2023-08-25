@@ -1,0 +1,839 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.TeamManagementMapper">
+
+    <resultMap id="TeamMap" type="TeamManagementVO">
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="deltStsFlg" column="DELT_STS_FLG" javaType="String"/>
+        <result property="prntTeamId" column="PRNT_TEAM_ID" javaType="String"/>
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="teamStDt" column="TEAM_ST_DT" javaType="java.sql.Date"/>
+        <result property="teamEndDt" column="TEAM_END_DT" javaType="java.sql.Date"/>
+        <result property="teamDesc" column="TEAM_DESC" javaType="String"/>
+        <result property="teamLvl" column="TEAM_LVL" javaType="Integer"/>
+        <result property="ordByNo" column="ORD_BY_NO" javaType="Integer"/>
+        <result property="teamCd" column="TEAM_CD" javaType="String"/>
+        <result property="teamMgrId" column="TEAM_MGR_ID" javaType="String"/>
+        <result property="teamMgrNm" column="TEAM_MGR_NM" javaType="String"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+        <result property="countTeam" column="countTeam"/>
+        <result property="teamMgrSx" column="TEAM_MGR_SX"/>
+        <result property="teamMgrEml" column="TEAM_MGR_EML"/>
+    </resultMap>
+
+    <resultMap type="AdmTeamVO" id="AdmTeamMap">
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="deltStsFlg" column="DELT_STS_FLG" javaType="String"/>
+        <result property="prntTeamId" column="PRNT_TEAM_ID" javaType="String"/>
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="teamStDt" column="TEAM_ST_DT" javaType="java.sql.Date"/>
+        <result property="teamEndDt" column="TEAM_END_DT" javaType="java.sql.Date"/>
+        <result property="teamDesc" column="TEAM_DESC" javaType="String"/>
+        <result property="teamLvl" column="TEAM_LVL" javaType="Integer"/>
+        <result property="ordByNo" column="ORD_BY_NO" javaType="Integer"/>
+        <result property="teamCd" column="TEAM_CD" javaType="String"/>
+        <result property="teamMgrId" column="TEAM_MGR_ID" javaType="String"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+    </resultMap>
+
+    <select id="selectByKey" resultMap="AdmTeamMap">
+        select /** AdmTeam.selectByKey */
+            TEAM_ID,
+            DELT_STS_FLG,
+            PRNT_TEAM_ID,
+            TEAM_NM,
+            CO_CD,
+            TEAM_ST_DT,
+            TEAM_END_DT,
+            TEAM_DESC,
+            TEAM_LVL,
+            ORD_BY_NO,
+            TEAM_CD,
+            TEAM_MGR_ID,
+            cre_usr_id,
+            cre_dt,
+            upd_usr_id,
+            upd_dt
+        from ADM_TEAM
+        where 1 = 1
+          and TEAM_ID = #{teamId}
+    </select>
+    <select id="selectTeamByTeamTpCd" parameterType="TeamManagementVO" resultMap="TeamMap">
+        select /** mcm.TeamManagement.selectTeamByTeamTpCd */
+        team.TEAM_ID,
+        team.DELT_STS_FLG,
+        team.PRNT_TEAM_ID,
+        team.TEAM_NM,
+        team.CO_CD,
+        team.TEAM_ST_DT,
+        team.TEAM_END_DT,
+        team.TEAM_DESC,
+        team.TEAM_LVL,
+        team.ORD_BY_NO,
+        team.TEAM_CD,
+        team.TEAM_MGR_ID,
+        (select USR_NM from ADM_USR where USR_ID = team.TEAM_MGR_ID) TEAM_MGR_NM,
+        team.cre_usr_id, to_char(team.cre_dt, 'yyyymmddhh24mmss') as cre_dt,
+        team.upd_usr_id, to_char(team.upd_dt, 'yyyymmddhh24mmss') as upd_dt,
+        (select count(TEAM_ID) from ADM_TEAM_USR
+        where TEAM_ID = team.TEAM_ID
+        and APLY_END_DT is NULL
+        ) countTeam
+        from ADM_TEAM team
+        where 1 = 1
+        <if test="coCd != null and coCd != ''">
+            and team.CO_CD = #{coCd}
+        </if>
+        <if test="teamNm != null and teamNm != ''">
+            and team.TEAM_NM = #{teamNm}
+        </if>
+        <if test="teamMgrId != null and teamMgrId != ''">
+            and team.TEAM_MGR_ID = #{teamMgrId}
+        </if>
+        <if test="deltStsFlg != null and deltStsFlg != ''">
+            and team.DELT_STS_FLG = #{deltStsFlg}
+        </if>
+        order by team.TEAM_LVL ASC, team.ORD_BY_NO ASC
+    </select>
+
+    <update id="updateDeltStsFlgWithTeamTpCd" parameterType="TeamManagementVO">
+        update /** mcm.TeamManagement.updateDeltStsFlgWithTeamTpCd */
+            ADM_TEAM
+        set DELT_STS_FLG = #{deltStsFlg},
+            upd_dt       = sysdate
+        where 1 = 1
+          and CO_CD = #{coCd}
+    </update>
+
+
+    <select id="selectTreeTeamWithTeamID" parameterType="TeamManagementVO" resultMap="TeamMap">
+        select /** mcm.TeamManagement.selectTreeTeamWithTeamID */
+            distinct (team.TEAM_ID),
+                     team.DELT_STS_FLG,
+                     team.PRNT_TEAM_ID,
+                     team.TEAM_NM,
+                     team.CO_CD,
+                     team.TEAM_ST_DT,
+                     team.TEAM_END_DT,
+                     team.TEAM_DESC,
+                     team.TEAM_LVL,
+                     team.ORD_BY_NO,
+                     team.TEAM_CD,
+                     team.TEAM_MGR_ID,
+                     (select USR_NM from ADM_USR where USR_ID = team.TEAM_MGR_ID) TEAM_MGR_NM,
+                     team.cre_usr_id,
+                     to_char(team.cre_dt, 'yyyymmddhh24mmss') as                  cre_dt,
+                     team.upd_usr_id,
+                     to_char(team.upd_dt, 'yyyymmddhh24mmss') as                  upd_dt,
+                     '0'                                      as                  countTeam
+        from ADM_TEAM team
+        where 1 = 1
+          and upper(team.CO_CD) = upper(#{coCd})
+          and team.DELT_STS_FLG = #{deltStsFlg}
+        start with upper(team.TEAM_ID) = upper(#{teamId})
+        connect by prior team.TEAM_ID = team.PRNT_TEAM_ID
+        order by team.TEAM_LVL ASC, team.ORD_BY_NO ASC
+    </select>
+
+    <select id="countTeam" parameterType="TeamManagementVO" resultType="String">
+        select /** mcm.TeamManagement.countTeam */
+            count(TEAM_ID)
+        from ADM_TEAM_USR
+        where 1 = 1
+          and TEAM_ID = #{teamId}
+          and APLY_END_DT is NULL
+    </select>
+    <select id="selectAllTeamIdBelongToSelectedTeam" parameterType="hashMap" resultType="String">
+        select /** mcm.TeamManagement.selectAllTeamIdBelongToSelectedTeam */
+            distinct (team_id)
+        from adm_team
+        where 1 = 1
+          and delt_sts_flg = 'N'
+        start with upper(team_id) = upper(#{teamId})
+        connect by prior team_id = prnt_team_id
+    </select>
+
+    <resultMap id="AdmCoMap" type="AdmCoVO">
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="coNm" column="CO_NM" javaType="String"/>
+    </resultMap>
+    <select id="selectCompanyMapWithProjectUser" parameterType="hashMap" resultMap="AdmCoMap">
+        select /** sqlMapTeamManagement.selectCompanyMapWithProjectUser */
+        COM.CO_CD,
+        COM.CO_NM
+        FROM ADM_CO COM,
+        (
+        <if test="coCd != null and coCd != ''">
+            SELECT DISTINCT PJT.CO_CD FROM ADM_PJT PJT
+            WHERE 1=1
+            AND PJT.CO_CD = #{coCd}
+        </if>
+        <if test="coCd == null or coCd == ''">
+            SELECT DISTINCT PJT.CO_CD
+            FROM ADM_PJT PJT,
+            ADM_PJT_USR USR
+            WHERE 1=1
+            AND PJT.CO_CD IS NOT NULL
+            AND PJT.USE_FLG ='Y'
+            AND USR.USR_ID = #{usrId}
+            AND USR.PJT_ID = PJT.PJT_ID
+        </if>
+        )PJT
+        WHERE 1 = 1
+        AND COM.CO_CD = PJT.CO_CD
+        ORDER BY COM.CO_NM
+    </select>
+    <select id="selectCompanyMapWithProject" parameterType="hashMap" resultMap="AdmCoMap">
+        select /** sqlMapTeamManagement.selectCompanyMapWithProject */
+            COM.CO_CD,
+            COM.CO_NM
+        from ADM_CO COM,
+             (select DISTINCT PJT.CO_CD
+              from ADM_PJT PJT
+              where 1 = 1
+                AND PJT.CO_CD IS NOT NULL
+                AND PJT.DM_USE_FLG = 'Y'
+                AND (PJT.CRE_USR_ID = #{usrId} OR PJT.MGR_ID = #{usrId})
+             ) PJT
+        where 1 = 1
+          and COM.DELT_FLG &lt;&gt; 'Y'
+          and COM.CO_CD = PJT.CO_CD
+        ORDER BY COM.CO_NM
+    </select>
+    <select id="searchAdmCoForComboboxPlugin" parameterType="hashMap" resultMap="AdmCoMap">
+        /** sqlMapTeamManagement.searchAdmCoForComboboxPlugin */
+        SELECT DISTINCT
+        TMP.CO_CD,
+        COM.CO_NM
+        FROM
+        (
+        SELECT DISTINCT SLS_CTRT_CO.CO_CD
+        FROM ADM_PJT_ITRTN ,
+        SLS_CTRT_CO
+        WHERE 1 = 1
+        <if test="pjtId != null and pjtId != ''">
+            AND ADM_PJT_ITRTN.PJT_ID = #{pjtId}
+        </if>
+        AND ADM_PJT_ITRTN.CTRT_ID = SLS_CTRT_CO.CTRT_ID
+        UNION ALL
+        SELECT COM.CO_CD
+        FROM ADM_PJT,
+        ADM_CO COM
+        WHERE 1 = 1
+        <if test="pjtId != null and pjtId != ''">
+            AND ADM_PJT.PJT_ID = #{pjtId}
+        </if>
+        AND COM.CO_CD = ADM_PJT.CO_CD
+        <if test="coCd != null and coCd != ''">
+            UNION ALL
+            SELECT CO_CD
+            FROM ADM_CO
+            WHERE 1 = 1
+            AND CO_CD = #{coCd}
+        </if>
+        ) TMP,
+        ADM_CO COM
+        WHERE 1 = 1
+        <if test="coCd != null and coCd != ''">
+            AND TMP.CO_CD = #{coCd}
+        </if>
+        AND TMP.CO_CD = COM.CO_CD
+    </select>
+
+    <resultMap id="AdmTeamVOMap" type="AdmTeamVO">
+        <result property="teamId" column="teamId" javaType="String"/>
+        <result property="prntTeamId" column="prntTeamId" javaType="String"/>
+        <result property="teamNm" column="teamNm" javaType="String"/>
+        <result property="coCd" column="coCd" javaType="String"/>
+        <result property="teamStDt" column="teamStDt" javaType="java.sql.Date"/>
+        <result property="teamEndDt" column="teamEndDt" javaType="java.sql.Date"/>
+        <result property="teamDesc" column="teamDesc" javaType="String"/>
+        <result property="teamLvl" column="teamLvl" javaType="Integer"/>
+        <result property="ordByNo" column="ordByNo" javaType="Integer"/>
+        <result property="teamCd" column="teamCd" javaType="String"/>
+        <result property="teamMgrId" column="teamMgrId" javaType="String"/>
+        <result property="teamMgrNm" column="teamMgrNm" javaType="String"/>
+        <result property="fullNm" column="fullNm" javaType="String"/>
+        <result property="level" column="level" javaType="Integer"/>
+    </resultMap>
+    <select id="selectTeamAllocationXML" parameterType="hashMap" resultMap="AdmTeamVOMap">
+        /** TeamManagement.selectTeamAllocationXML */
+        <if test="adminFlag == &quot;Y&quot;">
+            SELECT
+            TEAM_ID AS "teamId",
+            PRNT_TEAM_ID AS "prntTeamId",
+            TEAM_NM AS "teamNm",
+            CO_CD AS "coCd",
+            TEAM_DESC AS "teamDesc",
+            TEAM_LVL AS "teamLvl",
+            ORD_BY_NO AS "ordByNo",
+            TEAM_CD AS "teamCd",
+            TEAM_MGR_ID AS "teamMgrId",
+            TEAM_MGR_NM AS "teamMgrNm",
+            FULL_NM AS "fullNm",
+            LEVEL AS "level"
+            FROM
+            (SELECT TEAM_ID,
+            NVL(PRNT_TEAM_ID,0) PRNT_TEAM_ID,
+            TEAM_NM,
+            CO_CD,
+            NVL(TEAM_DESC,'') TEAM_DESC,
+            TEAM_LVL,
+            ORD_BY_NO,
+            TEAM_CD,
+            TEAM_MGR_ID,
+            (SELECT USR_NM FROM ADM_USR WHERE USR_ID = TEAM_MGR_ID
+            ) TEAM_MGR_NM,
+            TEAM_CD
+            || '('
+            || TEAM_NM
+            || ')' AS FULL_NM
+            FROM ADM_TEAM
+            WHERE 1 = 1
+            <if test="coCd != null and coCd != ''">
+                AND CO_CD = #{coCd}
+            </if>
+            AND DELT_STS_FLG = 'N'
+            )ADM_TEAM_FILTER
+            START WITH ADM_TEAM_FILTER.PRNT_TEAM_ID = '0'
+            CONNECT BY NOCYCLE PRIOR ADM_TEAM_FILTER.TEAM_ID = ADM_TEAM_FILTER.PRNT_TEAM_ID
+            ORDER SIBLINGS BY ORD_BY_NO
+        </if>
+        <if test="adminFlag != &quot;Y&quot;">
+            SELECT
+            TEAM_ID AS "teamId",
+            PRNT_TEAM_ID AS "prntTeamId",
+            TEAM_NM AS "teamNm",
+            CO_CD AS "coCd",
+            TEAM_ST_DT AS "teamStDt",
+            TEAM_END_DT AS "teamEndDt",
+            TEAM_DESC AS "teamDesc",
+            TEAM_LVL AS "teamLvl",
+            ORD_BY_NO AS "ordByNo",
+            TEAM_CD AS "teamCd",
+            TEAM_MGR_ID AS "teamMgrId",
+            TEAM_MGR_NM AS "teamMgrNm",
+            FULL_NM AS "fullNm",
+            LEVEL AS "level"
+            FROM
+            (SELECT TEAM.TEAM_ID,
+            NVL(TEAM.PRNT_TEAM_ID,0) PRNT_TEAM_ID,
+            TEAM_NM,
+            CO_CD,
+            TO_CHAR(TEAM_ST_DT, 'yyyy-mm-dd') TEAM_ST_DT,
+            TO_CHAR(TEAM_END_DT, 'yyyy-mm-dd') TEAM_END_DT,
+            NVL(TEAM_DESC,'') TEAM_DESC,
+            TEAM_LVL,
+            ORD_BY_NO,
+            TEAM_CD,
+            TEAM_MGR_ID,
+            (SELECT USR_NM FROM ADM_USR WHERE USR_ID = TEAM_MGR_ID
+            ) TEAM_MGR_NM,
+            TEAM.TEAM_CD || '(' || TEAM.TEAM_NM || ')' AS FULL_NM
+            FROM ADM_TEAM TEAM
+            WHERE 1 = 1
+            <if test="coCd != null and coCd != ''">
+                AND CO_CD = #{coCd}
+            </if>
+            AND TEAM.DELT_STS_FLG = 'N'
+            )ADM_TEAM_FILTER
+            START WITH ADM_TEAM_FILTER.PRNT_TEAM_ID = '0'
+            CONNECT BY NOCYCLE PRIOR ADM_TEAM_FILTER.TEAM_ID = ADM_TEAM_FILTER.PRNT_TEAM_ID
+            ORDER SIBLINGS BY ORD_BY_NO
+        </if>
+    </select>
+
+    <update id="updateTeamInfo" parameterType="TeamManagementVO">
+        update /** TeamManagement.updateTeamInfo */
+            ADM_TEAM
+        set TEAM_NM     = #{teamNm},
+            TEAM_DESC   = #{teamDesc},
+            TEAM_CD     = #{teamCd},
+            TEAM_MGR_ID = #{teamMgrId},
+            upd_usr_id  = #{updateUser},
+            upd_dt      = sysdate
+        where 1 = 1
+          and TEAM_ID = #{teamId}
+    </update>
+
+    <select id="getOldTeamManagerFlag" parameterType="hashMap" resultType="String">
+        select adm_team_usr.APRO_OWNR_FLG
+        from ADM_TEAM_USR adm_team_usr
+        where USR_ID = #{oldUsrId}
+        and TEAM_ID = #{teamId}
+    </select>
+
+    <delete id="deleteOldTeamManager" parameterType="hashMap">
+        delete
+        from adm_team_usr
+        where USR_ID = #{oldUsrId}
+          and TEAM_ID = #{teamId}
+    </delete>
+
+    <update id="deleteTeamInfo" parameterType="hashMap">
+        update /** TeamManagement.deleteTeamInfo */
+            ADM_TEAM
+        set DELT_STS_FLG = #{deltStsFlg},
+            upd_usr_id   = #{updateUser},
+            upd_dt       = sysdate
+        where 1 = 1
+          and TEAM_ID IN
+              (select TEAM_ID from ADM_TEAM start with TEAM_ID = #{teamId} connect by prior TEAM_ID = prnt_team_id)
+    </update>
+
+    <select id="checkExistUsr" parameterType="hashMap" resultType="Integer">
+        select /** TeamManagement.checkExistUsr */
+            COUNT(*)
+        from ADM_TEAM_USR
+        where 1 = 1
+          and TEAM_ID = #{teamId}
+          and USR_ID = #{usrId}
+    </select>
+
+    <select id="checkExistUsrInPrntTeam" parameterType="hashMap" resultType="Integer">
+        select /** TeamManagement.checkExistUsrInPrntTeam */
+            COUNT(*)
+        from ADM_TEAM
+        where 1 = 1
+          and PRNT_TEAM_ID = #{teamId}
+          and TEAM_MGR_ID = #{usrId}
+          AND DELT_STS_FLG = 'N'
+    </select>
+
+    <resultMap id="TeamMap1" type="AdmTeamUsrVO">
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="ownerFlg" column="APRO_OWNR_FLG" javaType="String"/>
+        <result property="aplyStDt" column="APLY_ST_DT" javaType="java.sql.Date"/>
+    </resultMap>
+    <select id="selectUserExistInChildTeam" parameterType="hashMap" resultMap="TeamMap1">
+        SELECT
+            /** TeamManagement.selectUserExistInChildTeam */
+        TM.TEAM_ID,
+        USR.USR_ID,
+        USR.APRO_OWNR_FLG,
+        USR.APLY_ST_DT
+        FROM ADM_TEAM TM,
+        ADM_TEAM_USR USR
+        WHERE 1                               = 1
+        AND TM.TEAM_ID                        = USR.TEAM_ID
+        AND TM.DELT_STS_FLG                      = 'N'
+        AND USR.USR_ID                        = #{usrId}
+        AND USR.TEAM_ID               = #{teamId}
+    </select>
+
+    <select id="getNumberOfMembers" parameterType="hashMap" resultType="Integer">
+        /** TeamManagement.getNumberOfMembers */
+        SELECT CASE
+                   WHEN (
+                            SELECT apro_ownr_flg
+                            FROM adm_team_usr
+                            WHERE usr_id = (
+                                SELECT team_mgr_id
+                                FROM adm_team
+                                WHERE team_id = #{teamId}
+                            )
+                              AND team_id = #{teamId}
+                        ) = 'Y' THEN (
+                       SELECT COUNT(*)
+                       FROM adm_team_usr
+                       WHERE team_id = #{teamId}
+                         AND apro_ownr_flg = 'Y'
+                         AND usr_id IN (
+                           SELECT usr_id
+                           FROM adm_usr
+                           WHERE adm_usr.act_flg = 'Y'
+                       )
+                   )
+                   ELSE (SELECT COUNT(*) + 1
+                         FROM adm_team_usr
+                         WHERE team_id = #{teamId}
+                           AND apro_ownr_flg = 'Y'
+                           AND usr_id IN (
+                             SELECT usr_id
+                             FROM adm_usr
+                             WHERE adm_usr.act_flg = 'Y'
+                         ))
+                   END
+        FROM dual
+    </select>
+
+    <update id="updateOrder">
+        UPDATE ADM_TEAM
+        SET ORD_BY_NO  = #{ordByNo},
+            UPD_USR_ID = #{updateUser},
+            UPD_DT     = sysdate
+        WHERE 1 = 1
+          AND TEAM_ID = #{teamId}
+    </update>
+
+    <resultMap id="TeamMap2" type="TeamManagementVO">
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="prntTeamId" column="PRNT_TEAM_ID" javaType="String"/>
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+        <result property="teamCd" column="TEAM_CD" javaType="String"/>
+        <result property="teamMgrId" column="TEAM_MGR_ID" javaType="String"/>
+        <result property="teamMgrNm" column="TEAM_MGR_NM" javaType="String"/>
+        <result property="teamNmLPAD" column="TEAM_NM_2" javaType="String"/>
+        <result property="teamLvl" column="team_lvl"/>
+    </resultMap>
+    <select id="selectListTeamByTeamMgrId" parameterType="hashMap" resultMap="TeamMap2">
+        /**[SQLID: TeamManagementMapper.selectListTeamByTeamMgrId]*/
+        WITH tbl_all AS (
+        SELECT
+        team_id,
+        prnt_team_id,
+        team_nm,
+        co_cd,
+        team_st_dt,
+        team_end_dt,
+        team_desc,
+        ord_by_no,
+        team_cd,
+        team_mgr_id,
+        team_mgr_nm,
+        full_nm,
+        level team_lvl,
+        LPAD(' ┗ ', 2 * level - 1, 's/') || TEAM_NM as TEAM_NM_2
+        FROM
+        (
+        SELECT
+        team.team_id,
+        nvl(team.prnt_team_id, 0) prnt_team_id,
+        team_nm,
+        co_cd,
+        TO_CHAR(team_st_dt, 'yyyy-mm-dd') team_st_dt,
+        TO_CHAR(team_end_dt, 'yyyy-mm-dd') team_end_dt,
+        nvl(team_desc, '') team_desc,
+        team_lvl,
+        ord_by_no,
+        team_cd,
+        team_mgr_id,
+        (
+        SELECT
+        usr_nm
+        FROM
+        adm_usr
+        WHERE
+        usr_id = team_mgr_id
+        ) team_mgr_nm,
+        team.team_cd
+        || '('
+        || team.team_nm
+        || ')' AS full_nm
+        FROM
+        adm_team team
+        WHERE
+        1 = 1
+        AND team.co_cd =  #{coCd}
+        AND team.delt_sts_flg = 'N'
+        ) adm_team_filter
+        START WITH
+        adm_team_filter.prnt_team_id = '0'
+        CONNECT BY NOCYCLE
+        PRIOR adm_team_filter.team_id = adm_team_filter.prnt_team_id
+        ORDER SIBLINGS BY
+        ord_by_no
+        ), tbl_filter AS (
+        SELECT
+        team_id,
+        team_nm
+        FROM
+        adm_team team
+        WHERE
+        1 = 1
+        AND team.co_cd =  #{coCd}
+        AND team.delt_sts_flg = 'N'
+        <if test="searchRsceStsTeams == 'Y' and mgrId != 'admin'">
+        AND team.TEAM_ID not in
+        (
+        SELECT tteam.TEAM_ID
+        FROM ADM_TEAM tteam
+        WHERE 1 = 1
+        AND tteam.co_cd             = #{coCd}
+        AND tteam.delt_sts_flg      = 'N'
+        AND tteam.TEAM_MGR_ID != #{mgrId}
+        AND EXISTS
+        (
+        SELECT *
+        FROM ADM_TEAM tteam2
+        WHERE tteam2.TEAM_ID = tteam.PRNT_TEAM_ID
+        AND tteam2.TEAM_MGR_ID != #{mgrId}
+        AND tteam2.co_cd             = #{coCd}
+        AND tteam2.delt_sts_flg      = 'N'
+        )
+        AND NOT EXISTS
+        (
+            SELECT *
+            FROM ADM_TEAM tteam3
+            WHERE 1 = 1
+            AND tteam3.TEAM_MGR_ID    = #{mgrId}
+            AND tteam3.co_cd          = #{coCd}
+            AND tteam3.delt_sts_flg   = 'N'
+            START WITH tteam3.TEAM_ID = tteam.PRNT_TEAM_ID
+            CONNECT BY PRIOR tteam3.PRNT_TEAM_ID = tteam3.TEAM_ID
+        )
+        AND NOT EXISTS
+        (
+        SELECT *
+        FROM ADM_TEAM_USR t_usr
+        WHERE t_usr.TEAM_ID = tteam.TEAM_ID
+        AND t_usr.USR_ID = #{mgrId}
+        )
+        )
+        </if>
+        START WITH team.team_id IN (
+<!--         huy.pham change biz task 4338
+        SELECT
+        team.team_id
+        FROM
+        adm_team team
+        WHERE
+        1 = 1
+        AND team.co_cd =  #{coCd}
+        <if test="mgrId != null and mgrId != '' and isMaster != true">
+            AND team_mgr_id = #{mgrId}
+        </if>
+        AND team.delt_sts_flg = 'N'-->
+        SELECT TTEAM.TEAM_ID
+        FROM ADM_TEAM_USR TUSR,
+        ADM_TEAM TTEAM
+        WHERE TTEAM.TEAM_ID = TUSR.TEAM_ID
+        <if test="mgrId != null and mgrId != '' and isMaster != true">
+            AND TUSR.USR_ID = #{mgrId}
+        </if>
+        )
+        AND team.prnt_team_id NOT IN (
+<!--         huy.pham change biz task 4338
+        SELECT
+        team.team_id
+        FROM
+        adm_team team
+        WHERE
+        1 = 1
+        AND team.co_cd =  #{coCd}
+        <if test="mgrId != null and mgrId != '' and isMaster != true">
+            AND team_mgr_id = #{mgrId}
+        </if>
+        AND team.delt_sts_flg = 'N'-->
+
+        SELECT TTEAM.TEAM_ID
+        FROM ADM_TEAM_USR TUSR,
+        ADM_TEAM TTEAM
+        WHERE TTEAM.TEAM_ID = TUSR.TEAM_ID
+        <if test="mgrId != null and mgrId != '' and isMaster != true">
+            AND TUSR.USR_ID = #{mgrId}
+        </if>
+        ) CONNECT BY
+        PRIOR team.team_id = team.prnt_team_id
+        ORDER SIBLINGS BY
+        ord_by_no
+        )
+        SELECT
+        tbl_all.team_id        ,
+        tbl_all.co_cd          ,
+        tbl_all.team_nm        ,
+        tbl_all.team_mgr_id    ,
+        tbl_all.prnt_team_id   ,
+        tbl_all.team_lvl,
+        tbl_all.ord_by_no,
+        tbl_all.team_nm_2
+        FROM
+        tbl_all
+        INNER JOIN tbl_filter ON ( tbl_filter.team_id = tbl_all.team_id )
+    </select>
+
+    <select id="selectTeamInfoByTeamId" resultMap="AdmTeamMap">
+        SELECT *FROM ADM_TEAM WHERE TEAM_ID = #{teamId} and rownum = 1
+    </select>
+
+
+    <select id="selectUserTeamManager" resultMap="TeamMap" parameterType="map">
+        select TEAM_MGR_ID TEAM_MGR_ID,
+        (SELECT USR_NM FROM ADM_USR WHERE USR_ID = TEAM_MGR_ID) TEAM_MGR_NM,
+        (SELECT COM_USR_SX FROM ADM_USR WHERE USR_ID = TEAM_MGR_ID) TEAM_MGR_SX,
+        (SELECT USR_EML FROM ADM_USR WHERE USR_ID = TEAM_MGR_ID) TEAM_MGR_EML
+        from adm_team
+        where TEAM_ID = (select TEAM_ID from ADM_TEAM_USR where USR_ID = #{usrId} and APRO_OWNR_FLG = 'Y' and ROWNUM = 1)
+    </select>
+
+    <update id="deleteTeamByTeamId" parameterType="hashMap">
+        update /** TeamManagement.deleteTeamByTeamId */
+            ADM_TEAM
+        set DELT_STS_FLG = 'Y',
+            upd_usr_id   = #{updateUser},
+            upd_dt       = sysdate
+        where 1 = 1
+          and TEAM_ID = #{teamId}
+    </update>
+
+    <select id="findTeamByParentTeamId" parameterType="hashMap" resultMap="AdmTeamMap">
+        SELECT /** TeamManagement.findTeamByParentTeamId */
+            * 
+        FROM ADM_TEAM
+        WHERE 1 = 1
+            and PRNT_TEAM_ID = #{teamId}
+            and DELT_STS_FLG = 'N'
+    </select>
+
+    <select id="selectPrntTeamListByTeamId" parameterType="hashMap" resultMap="AdmTeamMap">
+        SELECT /** TeamManagement.selectPrntTeamListByTeamId */
+            *
+        FROM ADM_TEAM
+        WHERE 1 = 1
+          and TEAM_ID not in (select PRNT_TEAM_ID from  ADM_TEAM where TEAM_ID= #{teamId})
+          and TEAM_ID !=#{teamId}
+          and DELT_STS_FLG = 'N'
+    </select>
+
+    <select id="selectNewPrntTeamList" parameterType="hashMap" resultMap="AdmTeamVOMap">
+        /** TeamManagement.selectNewPrntTeamList */
+       Select *
+       from(
+        <if test="adminFlag == &quot;Y&quot;">
+            SELECT
+            TEAM_ID AS "teamId",
+            PRNT_TEAM_ID AS "prntTeamId",
+            TEAM_NM AS "teamNm",
+            CO_CD AS "coCd",
+            TEAM_DESC AS "teamDesc",
+            TEAM_LVL AS "teamLvl",
+            ORD_BY_NO AS "ordByNo",
+            TEAM_CD AS "teamCd",
+            TEAM_MGR_ID AS "teamMgrId",
+            TEAM_MGR_NM AS "teamMgrNm",
+            FULL_NM AS "fullNm",
+            LEVEL AS "level"
+            FROM
+            (SELECT TEAM_ID,
+            NVL(PRNT_TEAM_ID,0) PRNT_TEAM_ID,
+            TEAM_NM,
+            CO_CD,
+            NVL(TEAM_DESC,'') TEAM_DESC,
+            TEAM_LVL,
+            ORD_BY_NO,
+            TEAM_CD,
+            TEAM_MGR_ID,
+            (SELECT USR_NM FROM ADM_USR WHERE USR_ID = TEAM_MGR_ID
+            ) TEAM_MGR_NM,
+            TEAM_CD
+            || '('
+            || TEAM_NM
+            || ')' AS FULL_NM
+            FROM ADM_TEAM
+            WHERE 1 = 1
+            <if test="coCd != null and coCd != ''">
+                AND CO_CD = #{coCd}
+            </if>
+            AND TEAM_ID !=#{startId}
+            AND TEAM_ID not in (
+                                SELECT TEAM_ID
+                                FROM ADM_TEAM
+                                START WITH TEAM_ID =#{startId}
+                                CONNECT BY PRIOR TEAM_ID = PRNT_TEAM_ID)
+            AND DELT_STS_FLG = 'N'
+            )ADM_TEAM_FILTER
+            WHERE TEAM_ID !=#{startPrntTeamId}
+            START WITH ADM_TEAM_FILTER.PRNT_TEAM_ID = '0'
+            CONNECT BY NOCYCLE PRIOR ADM_TEAM_FILTER.TEAM_ID = ADM_TEAM_FILTER.PRNT_TEAM_ID
+            ORDER SIBLINGS BY ORD_BY_NO
+        </if>
+        <if test="adminFlag != &quot;Y&quot;">
+            SELECT
+            TEAM_ID AS "teamId",
+            PRNT_TEAM_ID AS "prntTeamId",
+            TEAM_NM AS "teamNm",
+            CO_CD AS "coCd",
+            TEAM_ST_DT AS "teamStDt",
+            TEAM_END_DT AS "teamEndDt",
+            TEAM_DESC AS "teamDesc",
+            TEAM_LVL AS "teamLvl",
+            ORD_BY_NO AS "ordByNo",
+            TEAM_CD AS "teamCd",
+            TEAM_MGR_ID AS "teamMgrId",
+            TEAM_MGR_NM AS "teamMgrNm",
+            FULL_NM AS "fullNm",
+            LEVEL AS "level"
+            FROM
+            (SELECT TEAM.TEAM_ID,
+            NVL(TEAM.PRNT_TEAM_ID,0) PRNT_TEAM_ID,
+            TEAM_NM,
+            CO_CD,
+            TO_CHAR(TEAM_ST_DT, 'yyyy-mm-dd') TEAM_ST_DT,
+            TO_CHAR(TEAM_END_DT, 'yyyy-mm-dd') TEAM_END_DT,
+            NVL(TEAM_DESC,'') TEAM_DESC,
+            TEAM_LVL,
+            ORD_BY_NO,
+            TEAM_CD,
+            TEAM_MGR_ID,
+            (SELECT USR_NM FROM ADM_USR WHERE USR_ID = TEAM_MGR_ID
+            ) TEAM_MGR_NM,
+            TEAM.TEAM_CD || '(' || TEAM.TEAM_NM || ')' AS FULL_NM
+            FROM ADM_TEAM TEAM
+            WHERE 1 = 1
+            <if test="coCd != null and coCd != ''">
+                AND CO_CD = #{coCd}
+            </if>
+            AND TEAM_ID !=#{startId}
+            AND TEAM_ID not in (
+                                SELECT TEAM_ID
+                                FROM ADM_TEAM
+                                START WITH TEAM_ID =#{startId}
+                                CONNECT BY PRIOR TEAM_ID = PRNT_TEAM_ID)
+            AND TEAM.DELT_STS_FLG = 'N'
+            )ADM_TEAM_FILTER
+            WHERE TEAM_ID !=#{startPrntTeamId}
+            START WITH ADM_TEAM_FILTER.PRNT_TEAM_ID = '0'
+            CONNECT BY NOCYCLE PRIOR ADM_TEAM_FILTER.TEAM_ID = ADM_TEAM_FILTER.PRNT_TEAM_ID
+            ORDER SIBLINGS BY ORD_BY_NO
+        </if>
+                        )
+    </select>
+    
+    <update id="moveTeam">
+        UPDATE ADM_TEAM
+        SET ORD_BY_NO  = #{startOrderByNo},
+            PRNT_TEAM_ID = #{targetId},
+            TEAM_LVL = #{startLvl},
+            UPD_USR_ID = #{updateUsrId},
+            UPD_DT     = sysdate
+        WHERE 1 = 1
+          AND TEAM_ID = #{startId}
+    </update>
+
+    <select id="getNewOrderTeam" parameterType="hashMap" resultType="Integer">
+        SELECT /** TeamManagement.getNewOrderTeam */
+            NVL(MAX(ORD_BY_NO),0)
+        FROM ADM_TEAM
+        WHERE 1 = 1
+          AND PRNT_TEAM_ID = #{targetId}
+          AND DELT_STS_FLG = 'N'
+    </select>
+
+    <select id="selectListTeamByTeamParentTeamId" parameterType="hashMap" resultMap="TeamMap2">
+       select * /** TeamManagement.selectListTeamByTeamParentTeamId */
+       from(SELECT TEAM_ID, PRNT_TEAM_ID, TEAM_NM, TEAM_LVL, DELT_STS_FLG
+                FROM ADM_TEAM 
+                  START WITH TEAM_ID =#{prntTeamId}
+                  CONNECT BY PRIOR TEAM_ID = PRNT_TEAM_ID)
+        where TEAM_ID != #{prntTeamId}
+        and DELT_STS_FLG = 'N'
+    </select>
+
+    <update id="updateTeamLvl">
+        UPDATE ADM_TEAM
+        SET TEAM_LVL = #{teamLvl},
+            UPD_USR_ID = #{userId},
+            UPD_DT     = sysdate
+        WHERE 1 = 1
+          AND TEAM_ID = #{teamId}
+    </update>
+</mapper>

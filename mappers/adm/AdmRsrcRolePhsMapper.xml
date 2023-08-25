@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.AdmRsrcRolePhsMapper">
+
+    <insert id="insert" parameterType="AdmRsrcRolePhsVO">
+    insert  /** adm.AdmRsrcRolePhs.insert */ 
+    into ADM_RSRC_ROLE_PHS( 
+            RSRC_ROLE_PHS_ID,
+            RSRC_ROLE_CD,
+            PROC_PHS_ID,
+            cre_usr_id, cre_dt, upd_usr_id, upd_dt
+            ) 
+    values(	
+            #{rsrcRolePhsId},
+            #{rsrcRoleCd},
+            #{procPhsId},
+            #{creUsrId},
+            sysdate, 
+            #{updUsrId},
+            sysdate
+            )
+	</insert>
+
+    <delete id="delete" parameterType="String">
+		delete  /** BizProcPhase.deleteRsrcRole */
+		ADM_RSRC_ROLE_PHS
+		where	1 = 1
+		and		PROC_PHS_ID = #{procPhsId}
+	</delete>
+</mapper>

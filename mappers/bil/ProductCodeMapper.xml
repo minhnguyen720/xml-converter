@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.bil.mappers.ProductCodeMapper">
+    <resultMap type="ProductCodeVO" id="ProductCodeMap">
+        <result property="prodId" column="PROD_ID" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="prodTpCd" column="PROD_TP_CD" javaType="String"/>
+        <result property="prodNm" column="PROD_NM" javaType="String"/>
+        <result property="prodDesc" column="PROD_DESC" javaType="String"/>
+        <result property="creDt" column="CRE_DT" javaType="String"/>
+        <result property="creUsrId" column="CRE_USR_ID" javaType="String"/>
+    </resultMap>
+
+    <select id="selectAllProductCode" resultMap="ProductCodeMap">
+        /**[SQLID: bil.ProductCode.selectAllProductCode]*/
+        SELECT pr.PROD_ID,
+               pr.CO_CD,
+               pr.PROD_TP_CD,
+               pr.PROD_NM,
+               pr.PROD_DESC,
+               pr.CRE_USR_ID,
+               pr.CRE_DT
+        FROM BIL_PROD pr
+        WHERE 1 = 1
+          AND pr.CO_CD = #{coCd}
+          AND DELT_FLG = 'N'
+        ORDER BY pr.PROD_ID
+    </select>
+
+    <resultMap type="ProductVO" id="ProductMap">
+        <result property="prodCateId" column="PROD_CATE_ID" javaType="String"/>
+        <result property="prodId" column="PROD_ID" javaType="String"/>
+        <result property="prodSvcId" column="PROD_SVC_ID" javaType="String"/>
+    </resultMap>
+    <select id="selectExistProductCode" resultMap="ProductMap">
+        /**[SQLID: bil.ProductCode.selectExistProductCode]*/
+        SELECT pd.PROD_CATE_ID,
+        pd.PROD_ID,
+        pd.PROD_SVC_ID
+        FROM BIL_PROD_DTL pd
+        WHERE 1 = 1
+        AND DELT_FLG = 'N'
+        <if test="coCd.isEmpty()">
+            AND pd.CO_CD = #{coCd}
+        </if>
+    </select>
+
+
+
+</mapper>

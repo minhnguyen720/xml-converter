@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.AdmPjtPfxMapper">
+    <insert id="insert">
+        insert /** AdmPjtPfx.insert */
+        into ADM_PJT_PFX(PJT_ID,
+                         PFX_NM,
+                         PFX_COLR_NM,
+                         cre_usr_id, cre_dt, upd_usr_id, upd_dt)
+        values (#{pjtId},
+                #{pfxNm},
+                #{pfxColrNm},
+                #{createUser}, sysdate, #{updateUser}, sysdate)
+    </insert>
+
+    <delete id="delete">
+        delete /** AdmPjtPfx.delete */
+            ADM_PJT_PFX
+        where 1 = 1
+          and PJT_ID = #{pjtId}
+    </delete>
+</mapper>

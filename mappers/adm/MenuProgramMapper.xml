@@ -1,0 +1,79 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.MenuProgramMapper">
+
+    <insert id="insert" parameterType="PIADM_006VO" >
+		insert  /** qms.AdmMnuPgm.insert */
+		into ADM_MNU_PGM(
+				MNU_PGM_ID,
+				PRNT_MNU_ID,
+				MNU_PGM_NM,
+				MNU_PGM_ORD_NO,
+				MNU_PGM_URL_HTML,
+				MNU_PGM_RMK,
+				POPUP_FLG,
+                MNU_TP_CD,
+				MNU_FLG,
+				MNU_USD,
+				DELT_STS_FLG,
+                PJT_ID,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+				)
+		values(
+				#{mnuPgmId},
+				#{prntId},
+				#{mnuPgmNm},
+				#{mnuPgmOrdNo},
+				#{mnuPgmUrl},
+				#{mnuPgmRmk},
+				#{popupFlg},
+                #{mnuType},
+				#{mnuFlag},
+				#{mnuUsd},
+				#{deltStsFlg},
+                #{pjtId},
+				#{createUser}, sysdate, #{updateUser}, sysdate
+				)
+	</insert>
+
+    <update id="update" parameterType="hashMap">
+        update  /** qms.AdmMnuPgm.update */
+        ADM_MNU_PGM set
+        <if test="mnuPgmId != null and mnuPgmId != ''">
+            MNU_PGM_ID = #{mnuPgmId},
+        </if>
+        <if test="prntId != null and prntId != ''">
+            PRNT_MNU_ID = #{prntId},
+        </if>
+        <if test="mnuPgmNm != null and mnuPgmNm != ''">
+            MNU_PGM_NM = #{mnuPgmNm},
+        </if>
+        <if test="mnuPgmOrdNo != null and mnuPgmOrdNo != ''">
+            MNU_PGM_ORD_NO = #{mnuPgmOrdNo},
+        </if>
+        <if test="mnuPgmUrl != null">
+            MNU_PGM_URL_HTML = #{mnuPgmUrl},
+        </if>
+        <if test="mnuPgmRmk != null">
+            MNU_PGM_RMK = #{mnuPgmRmk},
+        </if>
+        <if test="popupFlg != null and popupFlg != ''">
+            POPUP_FLG = #{popupFlg},
+        </if>
+        <if test="mnuType != null and mnuType != ''">
+            MNU_TP_CD = #{mnuType},
+        </if>
+        <if test="mnuFlag != null and mnuFlag != ''">
+            MNU_FLG = #{mnuFlag},
+        </if>
+        <if test="mnuUsd != null and mnuUsd != ''">
+            MNU_USD = #{mnuUsd},
+        </if>
+        <if test="deltStsFlg != null and deltStsFlg != ''">
+            DELT_STS_FLG = #{deltStsFlg},
+        </if>
+        upd_usr_id = #{updateUser},
+        upd_dt = sysdate
+        where	1 = 1
+        and		MNU_PGM_ID = #{mnuPgmId}
+    </update>
+</mapper>

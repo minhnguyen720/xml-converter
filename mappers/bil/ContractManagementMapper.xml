@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.bil.mappers.ContractManagementMapper">
+    <resultMap type="AdmCoVO" id="custMap">
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="coNm" column="CO_NM" javaType="String"/>
+        <result property="ceoNm" column="CEO_NM" javaType="String"/>
+        <result property="addr" column="ADDR" javaType="String"/>
+        <result property="coTpCd" column="CO_TP_CD" javaType="String"/>
+        <result property="contactUsrId" column="CONTACT_USR_ID" javaType="String"/>
+        <result property="cntCd" column="CNT_CD" javaType="String"/>
+        <result property="ctyNm" column="CTY_NM" javaType="String"/>
+        <result property="endTmNo" column="END_TM_NO" javaType="Float"/>
+        <result property="lunHrNo" column="LUN_HR_NO" javaType="Float"/>
+        <result property="stLunTmNo" column="ST_LUN_TM_NO" javaType="Float"/>
+        <result property="stTmNo" column="ST_TM_NO" javaType="Float"/>
+        <result property="wrkHrNo" column="WRK_HR_NO" javaType="Float"/>
+        <result property="wrkDyCd" column="WRK_DY_CD" javaType="String"/>
+        <result property="utcTmNo" column="UTC_TM_NO" javaType="Float"/>
+        <result property="deltFlg" column="DELT_FLG" javaType="String"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+    </resultMap>
+    <select id="selectCustomer" resultMap="custMap">
+        select /** [SQLID: bil.ContractManagement.selectCustomer] */
+            CO_CD,
+            CO_NM,
+            CEO_NM,
+            ADDR,
+            CO_TP_CD,
+            CONTACT_USR_ID,
+            CNT_CD,
+            CTY_NM,
+            END_TM_NO,
+            LUN_HR_NO,
+            ST_LUN_TM_NO,
+            ST_TM_NO,
+            WRK_HR_NO,
+            WRK_DY_CD,
+            UTC_TM_NO,
+            DELT_FLG,
+            cre_usr_id,
+            cre_dt,
+            upd_usr_id,
+            upd_dt
+        from ADM_CO
+        where DELT_FLG <![CDATA[<>]]> 'Y'
+        ORDER BY CO_NM
+    </select>
+    <resultMap type="ContractVO" id="ContractVOMap">
+        <result property="ctrtId" column="CTRT_ID" javaType="String"/>
+        <result property="prntCtrtId" column="PRNT_CTRT_ID" javaType="String"/>
+        <result property="ctrtNm" column="CTRT_NM" javaType="String"/>
+        <result property="stDt" column="ST_DT" javaType="String"/>
+        <result property="endDt" column="END_DT" javaType="String"/>
+        <result property="agnFeeRto" column="AGN_FEE_RTO" javaType="String"/>
+        <result property="payTermPrd" column="PAY_TERM_PRD" javaType="String"/>
+        <result property="currCd" column="CURR_CD" javaType="String"/>
+        <result property="createDate" column="CRE_DT" javaType="String"/>
+        <result property="ctrtDesc" column="CTRT_DESC" javaType="String"/>
+        <result property="custCd" column="CUST_CD" javaType="String"/>
+    </resultMap>
+    <select id="selectContractByCoCd" resultMap="ContractVOMap">
+        /** [SQLID: bil.ContractManagement.selectContractByCoCd]*/
+        SELECT DISTINCT
+        CTRT.CTRT_ID ,
+        CTRT.PRNT_CTRT_ID,
+        CTRT.CTRT_NM ,
+        CTRT.ST_DT ,
+        CTRT.END_DT,
+        CTRT.AGN_FEE_RTO,
+        CTRT.PAY_TERM_PRD,
+        CTRT.CURR_CD,
+        CTRT.CTRT_DESC,
+        CTRT.CRE_DT,
+        (
+        SELECT CO_CD
+        FROM SLS_CTRT_CO
+        WHERE CTRT_CO_TP_CD = 'CTRT_CO_TPC' AND CTRT_ID = CTRT.CTRT_ID
+        AND ROWNUM = 1
+        ) CUST_CD
+        FROM SLS_CTRT CTRT,
+        SLS_CTRT_CO CTRTCO
+        <if test="custCd != null">
+            ,(
+            SELECT *
+            FROM
+            (
+            SELECT CO.CTRT_ID,
+            LISTAGG(DECODE(CTRT_CO_TP_CD,'CTRT_CO_TPC',CO.CO_CD, ''),',') WITHIN GROUP (ORDER BY CO.CO_CD) CUST_CD,
+            <!-- 				      WM_CONCAT(DECODE(CTRT_CO_TP_CD,'CTRT_CO_TPC',CO.CO_CD, NULL)) CUST_CD, -->
+            LISTAGG(DECODE(CTRT_CO_TP_CD,'CTRT_CO_TPV',CO.CO_CD, ''),',') WITHIN GROUP (ORDER BY CO.CO_CD) VEND_CD
+            <!-- 				      WM_CONCAT(DECODE(CTRT_CO_TP_CD,'CTRT_CO_TPV',CO.CO_CD, NULL)) VEND_CD -->
+            FROM SLS_CTRT_CO CO,
+            SLS_CTRT CT
+            WHERE 1 = 1
+            AND CT.CTRT_ID = CO.CTRT_ID
+            AND CT.DELT_FLG = 'N'
+            GROUP BY CO.CTRT_ID
+            )
+            WHERE 1 = 1
+            AND CUST_CD = #{custCd}
+            ) TMP
+        </if>
+        WHERE 1 = 1
+        AND CTRT.CTRT_ID = CTRTCO.CTRT_ID
+        AND CTRT.DELT_FLG = 'N'
+        <if test="stDt != null">
+            AND TO_DATE(CTRT.ST_DT, 'YYYYMMDD') <![CDATA[>=]]>  TO_DATE(#{stDt}, 'YYYYMMDD')
+        </if>
+        <if test="endDt != null">
+            AND TO_DATE(CTRT.END_DT, 'YYYYMMDD') <![CDATA[<=]]>  TO_DATE(#{endDt}, 'YYYYMMDD')
+        </if>
+        <if test="coCd != null">
+            AND CTRTCO.CO_CD = #{coCd}
+        </if>
+        <if test="custCd != null">
+            AND CTRT.CTRT_ID = TMP.CTRT_ID
+        </if>
+        ORDER BY CTRT.CRE_DT DESC
+    </select>
+
+    <resultMap type="ContractRateVO" id="BillingContractRateMap">
+        <result property="ctrtId" column="CTRT_ID" javaType="String"/>
+        <result property="ctrtRtId" column="CTRT_RT_ID" javaType="String"/>
+        <result property="prodDtlId" column="PROD_DTL_ID" javaType="String"/>
+        <result property="qtyNo" column="QTY_NO" javaType="String"/>
+        <result property="rtEffFmDt" column="RT_EFF_FM_DT" javaType="String"/>
+        <result property="rtEffToDt" column="RT_EFF_TO_DT" javaType="String"/>
+        <result property="svcStDt" column="SVC_ST_DT" javaType="String"/>
+        <result property="sellRtAmt" column="SELL_RT_AMT" javaType="String"/>
+        <result property="agnRtAmt" column="AGN_RT_AMT" javaType="String"/>
+        <result property="stndRtAmt" column="STND_RT_AMT" javaType="String"/>
+        <result property="prodCateNm" column="PROD_CATE_NM" javaType="String"/>
+        <result property="prodNm" column="PROD_NM" javaType="String"/>
+        <result property="prodSvcNm" column="PROD_SVC_NM" javaType="String"/>
+        <result property="prcUsgCd" column="PRC_USG_CD" javaType="String"/>
+        <result property="bilTmCd" column="BIL_TM_CD" javaType="String"/>
+        <result property="prcUtTpNm" column="PRC_UT_TP_NM" javaType="String"/>
+        <result property="custCd" column="CUST_CD" javaType="String"/>
+        <result property="prodCateId" column="PROD_CATE_ID" javaType="String"/>
+        <result property="prodSvcId" column="PROD_SVC_ID" javaType="String"/>
+    </resultMap>
+    <select id="selectListContractRate" resultMap="BillingContractRateMap">
+        /**[SQLID: bil.ContractManagement.searchListContractRate]*/
+        SELECT
+        (SELECT BP.PROD_NM FROM BIL_PROD BP WHERE (SELECT pdl.PROD_CATE_ID FROM BIL_PROD_DTL pdl WHERE rt.PROD_DTL_ID =
+        pdl.PROD_DTL_ID) = BP.PROD_ID) as PROD_CATE_NM,
+        (SELECT BP.PROD_NM FROM BIL_PROD BP WHERE (SELECT pdl.PROD_ID FROM BIL_PROD_DTL pdl WHERE rt.PROD_DTL_ID =
+        pdl.PROD_DTL_ID) = BP.PROD_ID) as PROD_NM,
+        (SELECT BP.PROD_NM FROM BIL_PROD BP WHERE (SELECT pdl.PROD_SVC_ID FROM BIL_PROD_DTL pdl WHERE rt.PROD_DTL_ID =
+        pdl.PROD_DTL_ID) = BP.PROD_ID) as PROD_SVC_NM,
+        rt.CTRT_RT_ID,
+        rt.PRC_USG_CD,
+        rt.BIL_TM_CD,
+        ((SELECT adm.CD_NM FROM BIL_COM_CD adm WHERE (SELECT pdl.PRC_UT_TP_CD FROM BIL_PROD_DTL pdl WHERE rt.PROD_DTL_ID
+        = pdl.PROD_DTL_ID) = adm.PRNT_CD||adm.COM_CD AND adm.USE_FLG = 'Y' AND CO_CD = #{coCd})
+        || ' ' ||(SELECT adm.CD_NM FROM BIL_COM_CD adm WHERE (SELECT pdl.PRC_UT_MEAS_CD FROM BIL_PROD_DTL pdl WHERE
+        rt.PROD_DTL_ID = pdl.PROD_DTL_ID) = adm.PRNT_CD||adm.COM_CD AND adm.USE_FLG = 'Y' AND CO_CD = #{coCd}))
+        PRC_UT_TP_NM,
+        (SELECT SCT.PRNT_CTRT_ID FROM SLS_CTRT SCT WHERE SCT.CTRT_ID = rt.CTRT_ID) as PRNT_CTRT_ID,
+        rt.PROD_DTL_ID,
+        rt.QTY_NO,
+        rt.SELL_RT_AMT,
+        <!-- dtl.STND_RT_AMT, -->
+        nvl(dtl.STND_RT_AMT,'0') STND_RT_AMT,
+        rt.AGN_RT_AMT,
+        TO_CHAR(TO_DATE(rt.RT_EFF_FM_DT, 'YYYYMMDD'), 'MM/DD/YYYY') RT_EFF_FM_DT,
+        TO_CHAR(TO_DATE(rt.RT_EFF_TO_DT, 'YYYYMMDD'), 'MM/DD/YYYY') RT_EFF_TO_DT,
+        TO_CHAR(TO_DATE(rt.SVC_ST_DT, 'YYYYMMDD'), 'MM/DD/YYYY') SVC_ST_DT,
+        rt.CTRT_ID,
+        (
+        SELECT CO_CD
+        FROM SLS_CTRT_CO
+        WHERE CTRT_CO_TP_CD = 'CTRT_CO_TPC' AND CTRT_ID = slc.CTRT_ID
+        AND ROWNUM = 1
+        ) CUST_CD,
+        dtl.PROD_CATE_ID,
+        dtl.PROD_SVC_ID
+        FROM BIL_CTRT_RT rt, BIL_PROD_DTL dtl, SLS_CTRT slc
+        WHERE 1 = 1
+        AND dtl.PROD_DTL_ID = rt.PROD_DTL_ID
+        AND rt.CTRT_ID = slc.CTRT_ID
+        <if test="ctrtId != null">
+            AND rt.CTRT_ID in (#{ctrtId} , (select PRNT_CTRT_ID from SLS_CTRT where CTRT_ID = #{ctrtId}))
+        </if>
+    </select>
+
+    <resultMap type="TradePartnerVO" id="TradePartnerVOMap">
+        <result property="trdPrnrId" column="TRD_PRNR_ID" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="coNm" column="CO_NM" javaType="String"/>
+        <result property="ctrtCoTpCd" column="CTRT_CO_TP_CD" javaType="String"/>
+    </resultMap>
+    <select id="selectPartnerCustomer" resultMap="TradePartnerVOMap">
+        /** PartnerManagement.selectPartnerCustomer */
+        SELECT trd.TRD_PRNR_ID,
+        trd.TRD_PRNR_CD CO_CD,
+        (SELECT CO_NM FROM ADM_CO WHERE CO_CD = trd.TRD_PRNR_CD AND ROWNUM = 1) CO_NM,
+        trd.CTRT_CO_TP_CD
+        FROM ADM_TRD_PRNR trd
+        WHERE 1 = 1
+        <if test="coCd != null">
+            AND trd.CO_CD = #{coCd}
+        </if>
+    </select>
+
+    <resultMap type="com.dou.bil.models.BillingVO" id="bilInfoMap">
+        <result property="bilNo" 		column="BIL_NO" 		javaType="String"/>
+        <result property="bilSeq" 		column="BIL_SEQ" 		javaType="Integer"/>
+        <result property="ctrtId" 		column="CTRT_ID" 		javaType="String"/>
+        <result property="prodCateNm" 	column="PROD_CATE_NM" 	javaType="String"/>
+        <result property="prodNm" 		column="PROD_NM" 		javaType="String"/>
+        <result property="prodSvcNm" 	column="PROD_SVC_NM" 	javaType="String"/>
+        <result property="prcUtTpNm" 	column="PRC_UT_TP_NM" 	javaType="String"/>
+        <result property="qtyNo" 		column="QTY_NO" 		javaType="Integer"/>
+        <result property="bilTp" 		column="BIL_TP" 		javaType="String"/>
+        <result property="bilMon" 		column="BIL_MON" 		javaType="String"/>
+        <result property="ots" 			column="OTS" 			javaType="String"/>
+        <result property="isConfirm"	column="BIL_CFM_FLG" 	javaType="String"/>
+        <result property="bilDt" 		column="BIL_DT" 		javaType="String"/>
+        <result property="dueDt" 		column="DUE_DT" 		javaType="String"/>
+        <result property="clt" 			column="CLT" 			javaType="String"/>
+        <result property="cAmt" 		column="C_AMT" 			javaType="String"/>
+        <result property="payTermPrd" 	column="PAY_TERM_PRD" 	javaType="String"/>
+    </resultMap>
+    <select id="searchLstBillingInfo" resultMap="bilInfoMap" parameterType="HashMap">
+        /**[SQLID: bil.ContractManagement.selectListBillingInformation]*/
+        SELECT	BIL.BIL_NO,
+        BIL.BIL_SEQ,
+        BIL.CTRT_ID,
+        (	SELECT 	PROD_NM
+        FROM 	BIL_PROD
+        WHERE 	(	SELECT 	PDL.PROD_CATE_ID
+        FROM 	BIL_PROD_DTL PDL
+        WHERE 	DTL.PROD_DTL_ID = PDL.PROD_DTL_ID
+        ) = PROD_ID
+        ) PROD_CATE_NM,
+        (	SELECT PROD_NM
+        FROM BIL_PROD
+        WHERE PROD_ID = DTL.PROD_ID
+        AND ROWNUM = 1
+        ) PROD_NM,
+        (	SELECT 	PROD_NM
+        FROM 	BIL_PROD
+        WHERE 	(	SELECT 	PDL.PROD_SVC_ID
+        FROM 	BIL_PROD_DTL PDL
+        WHERE 	CTRT.PROD_DTL_ID = PDL.PROD_DTL_ID
+        ) = PROD_ID
+        ) PROD_SVC_NM,
+        (	(	SELECT ADM.CD_NM
+        FROM BIL_COM_CD ADM
+        WHERE (	SELECT PDL.PRC_UT_TP_CD
+        FROM BIL_PROD_DTL PDL
+        WHERE CTRT.PROD_DTL_ID = PDL.PROD_DTL_ID
+        ) = ADM.PRNT_CD||ADM.COM_CD AND ADM.USE_FLG = 'Y'
+        AND CO_CD = #{coCd}
+        )
+        || ' ' ||
+        (	SELECT ADM.CD_NM
+        FROM BIL_COM_CD ADM
+        WHERE (	SELECT PDL.PRC_UT_MEAS_CD
+        FROM BIL_PROD_DTL PDL
+        WHERE CTRT.PROD_DTL_ID = PDL.PROD_DTL_ID
+        ) = ADM.PRNT_CD||ADM.COM_CD AND ADM.USE_FLG = 'Y'
+        AND CO_CD = #{coCd}
+        )
+        ) PRC_UT_TP_NM,
+        BIL.QTY_NO,
+        CTRT.PRC_USG_CD BIL_TP,
+        TO_CHAR(to_date(BIL.BIL_MON, 'yyyyMMdd'), 'dd-MON') BIL_MON,
+        BIL.SELL_RT_AMT OTS,
+        BIL.BIL_CFM_FLG BIL_CFM_FLG,
+        TO_CHAR(TO_DATE(BIL.BIL_DT, 'yyyyMMdd'), 'MM/dd/yyyy') BIL_DT,
+        TO_CHAR(TO_DATE(BIL.PAY_DT, 'yyyyMMdd'), 'MM/dd/yyyy') DUE_DT,
+        BIL.PAY_CFM_FLG CLT,
+        (SELECT CLT_AMT FROM BIL_OTS WHERE BIL_NO = BIL.BIL_NO AND ROWNUM = 1) C_AMT,
+        (SELECT PAY_TERM_PRD FROM BIL_OTS WHERE BIL_NO = BIL.BIL_NO AND ROWNUM = 1) PAY_TERM_PRD
+        FROM	BIL_BIL BIL,
+        BIL_CTRT_RT CTRT,
+        BIL_PROD_DTL DTL
+        WHERE	1 = 1
+        AND		BIL.CTRT_RT_ID = CTRT.CTRT_RT_ID
+        AND		CTRT.PROD_DTL_ID = DTL.PROD_DTL_ID
+        AND		BIL.CTRT_ID = #{ctrtId}
+        <!-- <if test="ctrtRtId != null"> -->
+        AND		CTRT.CTRT_RT_ID = #{ctrtRtId}
+        <!-- </if> -->
+        AND		BIL.DELT_FLG = 'N'
+    </select>
+
+    <insert id="insertContractRateVO" parameterType="ContractRateVO">
+		/**[SQLID: bil.ContractManagement.insertContractRateVO]*/
+		INSERT INTO BIL_CTRT_RT
+				(
+					CTRT_RT_ID,
+					CTRT_ID,
+					PROD_DTL_ID,
+					PRC_USG_CD,
+					BIL_TM_CD,
+					QTY_NO,
+					SELL_RT_AMT,
+					STND_RT_AMT,
+					RT_EFF_FM_DT,
+					RT_EFF_TO_DT,
+					AGN_RT_AMT,
+					SVC_ST_DT,
+					CRE_USR_ID,
+					CRE_DT,
+					UPD_USR_ID,
+					UPD_DT
+				)
+		VALUES	(
+					#{ctrtRtId},
+					#{ctrtId},
+					#{prodDtlId},
+					#{prcUsgCd},
+					#{bilTmCd},
+					#{qtyNo},
+					#{sellRtAmt},
+					#{stndRtAmt},
+					#{rtEffFmDt},
+					#{rtEffToDt},
+					#{agnRtAmt},
+					#{svcStDt},
+					#{creUsrId},
+					sysdate,
+					#{updUsrId},
+					sysdate
+				)
+	</insert>
+
+    <update id="updateContractRateVO" parameterType="ContractRateVO">
+		/**[SQLID: bil.ContractManagement.updateContractRateVO]*/
+		UPDATE	BIL_CTRT_RT
+		SET
+				PROD_DTL_ID = #{prodDtlId},
+				PRC_USG_CD = #{prcUsgCd},
+				BIL_TM_CD = #{bilTmCd},
+				QTY_NO = #{qtyNo},
+				STND_RT_AMT = TO_NUMBER(#{stndRtAmt}),
+				SELL_RT_AMT = TO_NUMBER(#{sellRtAmt}),
+				AGN_RT_AMT = TO_NUMBER(#{agnRtAmt}),
+				RT_EFF_FM_DT = #{rtEffFmDt},
+				RT_EFF_TO_DT = #{rtEffToDt},
+				SVC_ST_DT = #{svcStDt},
+				UPD_USR_ID = #{updUsrId},
+				UPD_DT = sysdate
+		WHERE	CTRT_ID = #{ctrtId}
+		AND 	CTRT_RT_ID = #{ctrtRtId}
+	</update>
+
+    <select id="selectContractWithParentContract" resultMap="ContractVOMap" parameterType="hashMap">
+        /**[SQLID: bil.ContractManagement.selectContractWithParentContract]*/
+        SELECT 	CTRT_ID,
+        PRNT_CTRT_ID
+        FROM SLS_CTRT
+        WHERE 1=1
+        <if test="prntCtrtId != null and prntCtrtId != '' ">
+            AND PRNT_CTRT_ID = #{prntCtrtId}
+        </if>
+    </select>
+
+    <delete id="deleteCtrtCo" parameterType="hashMap">
+        /**[SQLID: bil.ContractManagement.deleteCtrtCo]*/
+		delete SLS_CTRT_CO
+		where CTRT_ID = #{ctrtId}
+	</delete>
+
+    <delete id="deleteContractRate" parameterType="ContractRateVO">
+        delete from BIL_CTRT_RT
+        WHERE 1 = 1
+        and CTRT_ID = #{ctrtId}
+        and CTRT_RT_ID = #{ctrtRtId}
+    </delete>
+
+
+    <select id="getMenuDefinderByPjt" parameterType="String" resultType="hashMap">
+    SELECT CO_CD,CO_NM
+    FROM
+      (SELECT c_co.CO_CD,
+        com.CO_NM,
+        ctrt.ST_DT,
+        ctrt.END_DT
+      FROM SLS_CTRT_CO c_co,
+        SLS_CTRT ctrt,
+        ADM_CO com
+      WHERE c_co.CTRT_ID = ctrt.CTRT_ID
+      AND c_co.CO_CD     = com.CO_CD
+      AND ctrt.DELT_FLG  = 'N'
+      AND ctrt.CTRT_ID  IN
+        ( SELECT DISTINCT sub_c_co.CTRT_ID
+        FROM SLS_CTRT_CO sub_c_co
+        WHERE sub_c_co.CO_CD = (SELECT CO_CD FROM ADM_PJT WHERE PJT_ID = #{pjtId})
+        )
+      AND c_co.CO_CD != (SELECT CO_CD FROM ADM_PJT WHERE PJT_ID = #{pjtId})
+      )
+    GROUP BY CO_CD,CO_NM
+    </select>
+</mapper>

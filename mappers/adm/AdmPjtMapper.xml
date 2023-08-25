@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.AdmPjtMapper">
+    <resultMap type="com.dou.adm.models.AdmPjtVO" id="AdmPjtMap">
+        <result property="pjtId" column="PJT_ID"/>
+        <result property="prntPjtId" column="PRNT_PJT_ID"/>
+        <result property="mgmtRoleId" column="MGMT_ROLE_ID"/>
+        <result property="pjtNm" column="PJT_NM"/>
+        <result property="mgrId" column="MGR_ID"/>
+        <result property="stDt" column="ST_DT"/>
+        <result property="endDt" column="END_DT"/>
+        <result property="useFlg" column="USE_FLG"/>
+        <result property="chkOutFlg" column="CHK_OUT_FLG"/>
+        <result property="pjtTpCd" column="PJT_TP_CD"/>
+        <result property="dbIp" column="DB_IP"/>
+        <result property="dbUsrId" column="DB_USR_ID"/>
+        <result property="dbPwd" column="DB_PWD"/>
+        <result property="dbTpCd" column="DB_TP_CD"/>
+        <result property="dbPortNo" column="DB_PORT_NO"/>
+        <result property="dbSvcId" column="DB_SVC_ID"/>
+        <result property="dicTpCd" column="DIC_TP_CD"/>
+        <result property="updDescFlg" column="UPD_DESC_FLG"/>
+        <result property="useSplDatFlg" column="USE_SPL_DAT_FLG"/>
+        <result property="mdtDmnGrpNm" column="MDT_DMN_GRP_NM"/>
+        <result property="coCd" column="CO_CD"/>
+        <result property="pjtCd" column="PJT_CD"/>
+        <result property="pjtPfxNm" column="PJT_PFX_NM"/>
+        <result property="dmUseFlg" column="DM_USE_FLG"/>
+        <result property="rootPjtId" column="ROOT_PJT_ID"/>
+        <result property="useLgcFlg" column="USE_LGC_FLG"/>
+        <result property="ownrNm" column="OWNR_NM"/>
+        <result property="ordNo" column="ORD_NO"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+    </resultMap>
+    <select id="select" resultMap="AdmPjtMap" parameterType="com.dou.adm.models.AdmPjtVO">
+        select /** AdmPjt.selectByKey */
+            PJT_ID,
+            PRNT_PJT_ID,
+            MGMT_ROLE_ID,
+            PJT_NM,
+            MGR_ID,
+            ST_DT,
+            END_DT,
+            USE_FLG,
+            CHK_OUT_FLG,
+            PJT_TP_CD,
+            DB_IP,
+            DB_USR_ID,
+            DB_PWD,
+            DB_TP_CD,
+            DB_PORT_NO,
+            DB_SVC_ID,
+            DIC_TP_CD,
+            UPD_DESC_FLG,
+            USE_SPL_DAT_FLG,
+            MDT_DMN_GRP_NM,
+            CO_CD,
+            PJT_CD,
+            PJT_PFX_NM,
+            DM_USE_FLG,
+            ROOT_PJT_ID,
+            USE_LGC_FLG,
+            OWNR_NM,
+            ORD_NO,
+            cre_usr_id,
+            cre_dt,
+            upd_usr_id,
+            upd_dt
+        from ADM_PJT
+        where 1 = 1
+          and PJT_ID = #{pjtId}
+    </select>
+
+    <select id="selectProjectByCompanyForCompanyRole" resultType="java.util.Map">
+        SELECT
+            pjt_id AS id,
+            pjt_nm AS value
+        FROM
+            adm_pjt
+        WHERE
+            1 = 1
+            AND   co_cd = #{coCd}
+            AND   use_flg = 'Y'
+            AND   prnt_pjt_id = '0'
+            AND   PJT_TP_CD = 'ADM_PJT_TPPJT'
+        ORDER BY value
+    </select>
+
+    <select id="selectProjectByCompany" resultType="java.util.Map">
+            SELECT pjt_id AS id,
+            pjt_nm      AS value,
+            co_cd AS coCd
+            FROM adm_pjt
+            WHERE 1         = 1
+                AND co_cd       = #{coCd}
+                AND use_flg     = 'Y'
+                AND prnt_pjt_id = '0'
+                AND PJT_TP_CD   = 'ADM_PJT_TPPJT'
+            UNION
+            SELECT pjt_id AS id,
+            pjt_nm     AS value,
+            co_cd AS coCd
+            FROM adm_pjt
+            WHERE 1         = 1
+            AND co_cd IN
+            (
+            SELECT DISTINCT ctr_co.CO_CD
+            FROM SLS_CTRT_CO ctr_co
+            WHERE ctr_co.CTRT_ID in
+            (
+            SELECT ctr_co_2.CTRT_ID
+            FROM SLS_CTRT_CO ctr_co_2, SLS_CTRT ctrt_2
+            WHERE ctr_co_2.CTRT_ID = ctrt_2.CTRT_ID
+            AND ctr_co_2.CO_CD = #{coCd}
+            AND ctrt_2.DELT_FLG != 'Y'
+--             AND TO_DATE(ctrt_2.ST_DT,'yyyymmdd') &lt;= SYSDATE
+--             AND TO_DATE(ctrt_2.END_DT||'235959','yyyymmddhh24MISS') &gt;= SYSDATE
+            )
+            AND ctr_co.CO_CD != #{coCd}
+            )
+            AND use_flg     = 'Y'
+            AND prnt_pjt_id = '0'
+            AND PJT_TP_CD   = 'ADM_PJT_TPPJT'
+            ORDER BY value
+    </select>
+    
+    <insert id="insert" parameterType="AdmPjtVO">
+        insert /** AdmPjt.insert */
+        into ADM_PJT(
+        <if test="pjtId != null and pjtId != ''">
+            PJT_ID,
+        </if>
+        <if test="prntPjtId != null and prntPjtId != ''">
+            PRNT_PJT_ID,
+        </if>
+        <if test="mgmtRoleId != null and mgmtRoleId != ''">
+            MGMT_ROLE_ID,
+        </if>
+        <if test="pjtNm != null and pjtNm != ''">PJT_NM,
+        </if>
+        <if test="mgrId != null and mgrId != ''">
+            MGR_ID,
+        </if>
+        <if test="stDt != null and stDt != ''">
+            ST_DT,
+        </if>
+        <if test="endDt != null and endDt != ''">
+            END_DT,
+        </if>
+        <if test="useFlg != null and useFlg != ''">
+            USE_FLG,
+        </if>
+        <if test="chkOutFlg != null and chkOutFlg != ''">
+            CHK_OUT_FLG,
+        </if>
+        <if test="pjtTpCd != null and pjtTpCd != ''">
+            PJT_TP_CD,
+        </if>
+        <if test="dbIp != null and dbIp != ''">
+            DB_IP,
+        </if>
+        <if test="dbUsrId != null and dbUsrId != ''">
+            DB_USR_ID,
+        </if>
+        <if test="dbPwd != null and dbPwd != ''">
+            DB_PWD,
+        </if>
+        <if test="dbTpCd != null and dbTpCd != ''">
+            DB_TP_CD,
+        </if>
+        <if test="dbPortNo != null and dbPortNo != ''">
+            DB_PORT_NO,
+        </if>
+        <if test="dbSvcId != null and dbSvcId != ''">
+            DB_SVC_ID,
+        </if>
+        <if test="dicTpCd != null and dicTpCd != ''">
+            DIC_TP_CD,
+        </if>
+        <if test="updDescFlg != null and updDescFlg != ''">
+            UPD_DESC_FLG,
+        </if>
+        <if test="useSplDatFlg != null and useSplDatFlg != ''">
+            USE_SPL_DAT_FLG,
+        </if>
+        <if test="mdtDmnGrpNm != null and mdtDmnGrpNm != ''">
+            MDT_DMN_GRP_NM,
+        </if>
+        <if test="coCd != null and coCd != ''">
+            CO_CD,
+        </if>
+        <if test="pjtCd != null and pjtCd != ''">
+            PJT_CD,
+        </if>
+        <if test="pjtPfxNm != null and pjtPfxNm != ''">
+            PJT_PFX_NM,
+        </if>
+        <if test="dmUseFlg != null and dmUseFlg  != ''">
+            DM_USE_FLG,
+        </if>
+        <if test="rootPjtId != null and rootPjtId != ''">
+            ROOT_PJT_ID,
+        </if>
+        <if test="useLgcFlg != null and useLgcFlg != ''">
+            USE_LGC_FLG,
+        </if>
+        <if test="ownrNm != null and ownrNm != ''">
+            OWNR_NM,
+        </if>
+        <if test="ordNo != null and ordNo != ''">
+            ORD_NO,
+        </if>
+        cre_usr_id, cre_dt, upd_usr_id, upd_dt)
+        values (
+        <if test="pjtId != null and pjtId != ''">
+            #{pjtId},
+        </if>
+        <if test="prntPjtId != null and prntPjtId != ''">
+            #{prntPjtId},
+        </if>
+        <if test="mgmtRoleId != null and mgmtRoleId != ''">
+            #{mgmtRoleId},
+        </if>
+        <if test="pjtNm != null and pjtNm != ''">
+            #{pjtNm},
+        </if>
+        <if test="mgrId != null and mgrId != ''">
+            #{mgrId},
+        </if>
+        <if test="stDt != null and stDt != ''">
+            #{stDt},
+        </if>
+        <if test="endDt != null and endDt != ''">
+            #{endDt},
+        </if>
+        <if test="useFlg != null and useFlg != ''">
+            #{useFlg},
+        </if>
+        <if test="chkOutFlg != null and chkOutFlg != ''">
+            #{chkOutFlg},
+        </if>
+        <if test="pjtTpCd != null and pjtTpCd != ''">
+            #{pjtTpCd},
+        </if>
+        <if test="dbIp != null and dbIp != ''">
+            #{dbIp},
+        </if>
+        <if test="dbUsrId != null and dbUsrId != ''">
+            #{dbUsrId},
+        </if>
+        <if test="dbPwd != null and dbPwd != ''">
+            #{dbPwd},
+        </if>
+        <if test="dbTpCd != null and dbTpCd != ''">
+            #{dbTpCd},
+        </if>
+        <if test="dbPortNo != null and dbPortNo != ''">
+            #{dbPortNo},
+        </if>
+        <if test="dbSvcId != null and dbSvcId != ''">
+            #{dbSvcId},
+        </if>
+        <if test="dicTpCd != null and dicTpCd != ''">
+            #{dicTpCd},
+        </if>
+        <if test="updDescFlg != null and updDescFlg != ''">
+            #{updDescFlg},
+        </if>
+        <if test="useSplDatFlg != null and useSplDatFlg != ''">
+            #{useSplDatFlg},
+        </if>
+        <if test="mdtDmnGrpNm != null and mdtDmnGrpNm != ''">
+            #{mdtDmnGrpNm},
+        </if>
+        <if test="coCd != null and coCd != ''">
+            #{coCd},
+        </if>
+        <if test="pjtCd != null and pjtCd != ''">
+            #{pjtCd},
+        </if>
+        <if test="pjtPfxNm != null and pjtPfxNm != ''">
+            #{pjtPfxNm},
+        </if>
+        <if test="dmUseFlg != null and dmUseFlg  != ''">
+            #{dmUseFlg},
+        </if>
+        <if test="rootPjtId != null and rootPjtId != ''">
+            #{rootPjtId},
+        </if>
+        <if test="useLgcFlg != null and useLgcFlg != ''">
+            #{useLgcFlg},
+        </if>
+        <if test="ownrNm != null and ownrNm != ''">
+            #{ownrNm},
+        </if>
+        <if test="ordNo != null and ordNo != ''">
+            #{ordNo},
+        </if>
+        #{createUser}, sysdate, #{updateUser}, sysdate)
+    </insert>
+    
+    <update id="updateWithMap" parameterType="hashMap">
+        update /** AdmPjt.updateWithMap */
+        ADM_PJT set
+        <if test="pjtId != null and pjtId != ''">
+            PJT_ID = #{pjtId},
+        </if>
+        <if test="prntPjtId != null and prntPjtId != ''">
+            PRNT_PJT_ID = #{prntPjtId},
+        </if>
+        <if test="mgmtRoleId != null and mgmtRoleId != ''">
+            MGMT_ROLE_ID = #{mgmtRoleId},
+        </if>
+        <if test="pjtNm != null and pjtNm != ''">
+            PJT_NM = #{pjtNm},
+        </if>
+        <if test="mgrId != null and mgrId != ''">
+            MGR_ID = #{mgrId},
+        </if>
+        <if test="stDt != null and stDt != ''">
+            ST_DT = #{stDt},
+        </if>
+        <if test="endDt != null and endDt != ''">
+            END_DT = #{endDt},
+        </if>
+        <if test="useFlg != null and useFlg != ''">
+            USE_FLG = #{useFlg},
+        </if>
+        <if test="chkOutFlg != null and chkOutFlg != ''">
+            CHK_OUT_FLG = #{chkOutFlg},
+        </if>
+        <if test="pjtTpCd != null and pjtTpCd != ''">
+            PJT_TP_CD = #{pjtTpCd},
+        </if>
+        <if test="dbIp != null and dbIp != ''">
+            DB_IP = #{dbIp},
+        </if>
+        <if test="dbUsrId != null and dbUsrId != ''">
+            DB_USR_ID = #{dbUsrId},
+        </if>
+        <if test="dbPwd != null and dbPwd != ''">
+            DB_PWD = #{dbPwd},
+        </if>
+        <if test="dbTpCd != null and dbTpCd != ''">
+            DB_TP_CD = #{dbTpCd},
+        </if>
+        <if test="dbPortNo != null and dbPortNo != ''">
+            DB_PORT_NO = #{dbPortNo},
+        </if>
+        <if test="dbSvcId != null and dbSvcId != ''">
+            DB_SVC_ID = #{dbSvcId},
+        </if>
+        <if test="dicTpCd != null and dicTpCd != ''">
+            DIC_TP_CD = #{dicTpCd},
+        </if>
+        <if test="updDescFlg != null and updDescFlg != ''">
+            UPD_DESC_FLG = #{updDescFlg},
+        </if>
+        <if test="useSplDatFlg != null and useSplDatFlg != ''">
+            USE_SPL_DAT_FLG = #{useSplDatFlg},
+        </if>
+        <if test="mdtDmnGrpNm != null and mdtDmnGrpNm != ''">
+            MDT_DMN_GRP_NM = #{mdtDmnGrpNm},
+        </if>
+        <if test="coCd != null and coCd != ''">
+            CO_CD = #{coCd},
+        </if>
+        <if test="pjtCd != null and pjtCd != ''">
+            PJT_CD = #{pjtCd},
+        </if>
+        <if test="pjtPfxNm != null and pjtPfxNm != ''">
+            PJT_PFX_NM = #{pjtPfxNm},
+        </if>
+        <if test="dmUseFlg != null and dmUseFlg != ''">
+            DM_USE_FLG = #{dmUseFlg},
+        </if>
+        <if test="rootPjtId != null and rootPjtId != ''">
+            ROOT_PJT_ID = #{rootPjtId},
+        </if>
+        <if test="useLgcFlg != null and useLgcFlg != ''">
+            USE_LGC_FLG = #{useLgcFlg},
+        </if>
+        <if test="ownrNm != null and ownrNm != ''">
+            OWNR_NM = #{ownrNm},
+        </if>
+        <if test="ordNo != null and ordNo != ''">
+            ORD_NO = #{ordNo},
+        </if>
+        upd_usr_id = #{updateUser},
+        upd_dt = sysdate
+        where 1 = 1
+        and PJT_ID = #{pjtId}
+    </update>
+
+    <resultMap type="ProjectInfoForDBCatalogVO" id="ProjectMap">
+		<result property="prntPjtId" column="PRNT_PJT_ID"/>
+		<result property="pjtId" column="PJT_ID"/>
+		<result property="pjtNm" column="PJT_NM"/>
+	</resultMap>
+    
+	<select id="selectProjectList" resultMap="ProjectMap" parameterType="hashMap">
+		
+        SELECT
+        /** dm.DatabaseCatalog.selectProjectList */
+        DISTINCT NVL(PJT.Prnt_Pjt_Id, 0) AS Prnt_Pjt_Id,
+        PJT.Pjt_Id,
+        PJT.PJT_NM
+        FROM (
+                SELECT DISTINCT
+                pjt.root_pjt_id pjt_id
+                FROM
+                adm_pjt         pjt,
+                adm_pjt_itrtn   p_itrtn,
+                adm_itrtn       itrtn,
+                (
+                SELECT DISTINCT
+                pjt_id
+                FROM
+                adm_pjt_usr
+                WHERE
+                1 = 1
+                AND usr_id = #{usrId}
+                ) pju
+                WHERE
+                1 = 1
+                AND pjt.pjt_id = pju.pjt_id
+                AND pjt.use_flg = 'Y'
+                AND p_itrtn.pjt_id = pjt.pjt_id
+                AND p_itrtn.itrtn_id = itrtn.itrtn_id
+            ) PJT_BY_USER,
+            ADM_PJT PJT
+            WHERE
+            PJT_BY_USER.PJT_ID = PJT.PJT_ID
+            AND PJT.PRNT_PJT_ID = '0'
+            ORDER BY
+            PJT_NM
+			
+	</select>
+
+    <select id="selectManagerListByProjectId" resultType="String">
+        SELECT MGR_ID
+        FROM ADM_PJT
+        WHERE PJT_ID <![CDATA[<>]]> #{pjtId}
+        START WITH PJT_ID = #{pjtId}
+        CONNECT BY NOCYCLE
+        PRIOR PRNT_PJT_ID = PJT_ID
+    </select>
+</mapper>

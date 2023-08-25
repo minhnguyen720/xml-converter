@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.bil.mappers.PricingItemCodeMapper">
+    <resultMap type="AdmComCdVO" id="CombineComCdVOMap">
+        <result property="prntCd" column="PRNT_CD" javaType="String"/>
+        <result property="comCd" column="COM_CD" javaType="String"/>
+        <result property="cdNm" column="CD_NM" javaType="String"/>
+        <result property="ordByNo" column="ORD_BY_NO" javaType="Integer"/>
+        <result property="dfltVal" column="DFLT_VAL" javaType="String"/>
+    </resultMap>
+    <select id="selectCodeDefault" resultMap="CombineComCdVOMap">
+        SELECT /** bil.selectCodeDefault */
+        PRNT_CD,
+        CONCAT(PRNT_CD, COM_CD) as COM_CD,
+        CD_NM,
+        ORD_BY_NO,
+        DFLT_VAL
+        FROM BIL_COM_CD
+        WHERE 1 = 1
+        <trim prefix="and PRNT_CD in ">
+            <foreach item="item" index="index" collection="lstPrntCd"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </trim>
+        AND USE_FLG = 'Y'
+        AND CO_CD = #{coCd}
+        ORDER BY ORD_BY_NO, CD_NM
+    </select>
+</mapper>

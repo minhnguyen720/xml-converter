@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.AdmRolePgmBtnAuthMapper">
+
+	<!--
+		Sorry, I can`t migrate	AdmRolePgmBtnAuth
+		See console output for further details
+	-->
+	<!--
+		Sorry, I can`t migrate	AdmRolePgmBtnAuthKey
+		See console output for further details
+	-->
+	<resultMap id="AdmRolePgmBtnAuthMap" type="AdmRolePgmBtnAuthVO">
+		<result property="btnNo" column="BTN_NO" javaType="String"/>
+		<result property="roleId" column="ROLE_ID" javaType="String"/>
+		<result property="mnuPgmId" column="MNU_PGM_ID" javaType="String"/>
+		<result property="createUser" column="cre_usr_id"/>
+		<result property="updateUser" column="upd_usr_id"/>
+		<result property="createDate" column="cre_dt"/>
+		<result property="updateDate" column="upd_dt"/>
+	</resultMap>
+	<select id="selectByKey" parameterType="AdmRolePgmBtnAuthVO" resultMap="AdmRolePgmBtnAuthMap">
+		select 	/** AdmRolePgmBtnAuth.selectByKey */
+				BTN_NO,
+				ROLE_ID,
+				MNU_PGM_ID,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+		from	ADM_ROLE_PGM_BTN_AUTH
+		where	1 = 1
+		and		BTN_NO = #{btnNo}
+		and		ROLE_ID = #{roleId}
+		and		MNU_PGM_ID = #{mnuPgmId}
+	</select>
+	<select id="selectAll" resultMap="AdmRolePgmBtnAuthMap">
+		select 	/** AdmRolePgmBtnAuth.selectAll */
+				BTN_NO,
+				ROLE_ID,
+				MNU_PGM_ID,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+		from	ADM_ROLE_PGM_BTN_AUTH
+	</select>
+	<insert id="insert" parameterType="AdmRolePgmBtnAuthVO">
+		insert  /** AdmRolePgmBtnAuth.insert */
+		into ADM_ROLE_PGM_BTN_AUTH(
+				BTN_NO,
+				ROLE_ID,
+				MNU_PGM_ID,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+				)
+		values(
+				#{btnNo},
+				#{roleId},
+				#{mnuPgmId},
+				#{createUser}, sysdate, #{updateUser}, sysdate
+				)
+	</insert>
+	<update id="update" parameterType="AdmRolePgmBtnAuthVO">
+		update  /** AdmRolePgmBtnAuth.update */
+		ADM_ROLE_PGM_BTN_AUTH set
+				BTN_NO = #{btnNo},
+				ROLE_ID = #{roleId},
+				MNU_PGM_ID = #{mnuPgmId},
+				upd_usr_id = #{updateUser},
+				upd_dt = sysdate
+		where	1 = 1
+		and		BTN_NO = #{btnNo}
+		and		ROLE_ID = #{roleId}
+		and		MNU_PGM_ID = #{mnuPgmId}
+	</update>
+	<update id="updateWithMap" parameterType="hashMap">
+		update  /** AdmRolePgmBtnAuth.updateWithMap */
+		ADM_ROLE_PGM_BTN_AUTH set
+		<if test="btnNo != null and btnNo != ''">
+			BTN_NO = #{btnNo},
+		</if>
+		<if test="roleId != null and roleId != ''">
+			ROLE_ID = #{roleId},
+		</if>
+		<if test="mnuPgmId != null and mnuPgmId != ''">
+			MNU_PGM_ID = #{mnuPgmId},
+		</if>
+		upd_usr_id = #{updateUser},
+		upd_dt = sysdate
+		where	1 = 1
+		and		BTN_NO = #{btnNo}
+		and		ROLE_ID = #{roleId}
+		and		MNU_PGM_ID = #{mnuPgmId}
+	</update>
+	<delete id="delete" parameterType="AdmRolePgmBtnAuthVO">
+		delete  /** AdmRolePgmBtnAuth.delete */
+		ADM_ROLE_PGM_BTN_AUTH
+		where	1 = 1
+		and		BTN_NO = #{btnNo}
+		and		ROLE_ID = #{roleId}
+		and		MNU_PGM_ID = #{mnuPgmId}
+	</delete>
+
+</mapper>

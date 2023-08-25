@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.MenuStructureMapper">
+    <resultMap type="PIADM_006VO" id="PIADM_006VOMap">
+        <result property="mnuPgmId" column="MNU_PGM_ID" javaType="String"/>
+        <result property="prntId" column="PRNT_MNU_ID" javaType="String"/>
+        <result property="mnuPgmNm" column="MNU_PGM_NM" javaType="String"/>
+        <result property="mnuPgmOrdNo" column="MNU_PGM_ORD_NO" javaType="Integer"/>
+        <result property="mnuPgmUrl" column="MNU_PGM_URL_HTML" javaType="String"/>
+        <result property="mnuPgmRmk" column="MNU_PGM_RMK" javaType="String"/>
+        <result property="popupFlg" column="POPUP_FLG" javaType="String"/>
+        <result property="mnuType" column="MNU_TP_CD" javaType="String"/>
+        <result property="mnuFlag" column="MNU_FLG" javaType="String"/>
+        <result property="mnuUsd" column="MNU_USD" javaType="String"/>
+        <result property="deltStsFlg" column="DELT_STS_FLG" javaType="String"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+    </resultMap>
+    <select id="searchDataForPopup" resultMap="PIADM_006VOMap">
+        select /** mcm.MenuProgramManagement.searchDataForPopup */
+        MNU_PGM_ID,
+        PRNT_MNU_ID,
+        MNU_PGM_NM,
+        MNU_PGM_ORD_NO,
+        MNU_PGM_URL_HTML,
+        MNU_PGM_RMK,
+        POPUP_FLG,
+        MNU_TP_CD
+        MNU_FLG,
+        MNU_USD,
+        DELT_STS_FLG,
+        cre_usr_id, cre_dt, upd_usr_id, upd_dt
+        from ADM_MNU_PGM
+        where 1 = 1
+        and POPUP_FLG ='Y'
+        and DELT_STS_FLG ='N'
+        <if test="name != null and name != ''">
+            and UPPER(MNU_PGM_NM) like UPPER('%' || #{name} || '%')
+        </if>
+        order by MNU_PGM_NM ASC
+    </select>
+</mapper>

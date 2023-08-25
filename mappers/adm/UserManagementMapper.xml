@@ -1,0 +1,1585 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dou.adm.mappers.UserManagementMapper">
+
+    <resultMap id="AdmUsrMapInfor" type="AdmUsrVO">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="fullNm" column="FULL_NM" javaType="String"/>
+        <result property="comUsrDt" column="COM_USR_DT" javaType="String"/>
+        <result property="comUsrSx" column="COM_USR_SX" javaType="String"/>
+        <result property="coTelNo" column="CO_TEL_NO" javaType="String"/>
+        <result property="hmTelNo" column="HM_TEL_NO" javaType="String"/>
+        <result property="mphnNo" column="MPHN_NO" javaType="String"/>
+        <result property="faxNo" column="FAX_NO" javaType="String"/>
+        <result property="usrEml" column="USR_EML" javaType="String"/>
+        <result property="actFlg" column="ACT_FLG" javaType="String"/>
+        <result property="deltStsFlg" column="DELT_STS_FLG" javaType="String"/>
+        <result property="imgUrl" column="IMG_URL" javaType="String"/>
+        <result property="age" column="AGE" javaType="Integer"/>
+        <result property="ntlt" column="NTLT" javaType="String"/>
+        <result property="mrrStsCd" column="MRR_STS_CD" javaType="String"/>
+        <result property="edu" column="EDU" javaType="String"/>
+        <result property="hby" column="HBY" javaType="String"/>
+        <result property="wrkExp" column="WRK_EXP" javaType="String"/>
+        <result property="hmAddr" column="HM_ADDR" javaType="String"/>
+        <result property="spct" column="SPCT" javaType="String"/>
+        <result property="engLvl" column="ENG_LVL" javaType="String"/>
+        <result property="salyLvl" column="SALY_LVL" javaType="String"/>
+        <result property="prjHis" column="PRJ_HIS" javaType="String"/>
+        <result property="cntCd" column="CNT_CD" javaType="String"/>
+        <result property="ctyNm" column="CTY_NM" javaType="String"/>
+        <result property="isRoot" column="IS_ROOT" javaType="String"/>
+        <result property="brdyVal" column="BRDY_VAL" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="ctrbPntNo" column="CTRB_PNT_NO" javaType="Double"/>
+        <result property="perfPntNo" column="PERF_PNT_NO" javaType="Double"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+        <result property="usrNo" column="EMPE_NO"/>
+        <result property="strStartDt" column="EMPE_ST_DT"/>
+        <result property="strEndDt" column="EMPE_END_DT"/>
+        <result property="locCd" column="LOC_CD" javaType="String"/>
+        <result property="empeTpCd" column="EMPE_TP_CD" javaType="String"/>
+        <result property="workMonthsNumber" column="WORK_MONTHS_NUMBER" javaType="Float"/>
+        <result property="workStartDay" column="WORK_START_DAY" javaType="Integer"/>
+        <result property="usrDur" column="DURATION" javaType="java.lang.Integer"/>
+        <result property="deviceToken" column="DVC_TKN_CD" javaType="String"/>
+        <result property="usrSkypeId" column="SKY_ID" javaType="String"/>
+        <result property="ofcCd" column="OFC_CD" javaType="String"/>
+        <result property="teamNm" column="team_nm" javaType="String"/>
+        <result property="roleNm" column="ROLE_NM" javaType="String"/>
+    </resultMap>
+
+    <select id="searchUsrPopupInfo" parameterType="AdmUsrVO" resultMap="AdmUsrMapInfor">
+        SELECT
+          usr.usr_id,
+          usr.full_nm,
+          usr.usr_eml,
+          usr.mphn_no,
+          usr.img_url,
+          usr.sky_id,
+          NVL(
+          (
+            SELECT
+              team.team_nm
+            FROM
+              adm_team team,
+              adm_team_usr t_usr
+            WHERE
+              t_usr.usr_id    = usr.usr_id
+            AND t_usr.team_id = team.team_id
+            AND apro_ownr_flg = 'Y'
+          )
+          ,'') team_nm
+        FROM
+          ADM_USR usr
+        WHERE
+          1                  = 1
+        AND usr.usr_id       = #{usrId}
+    </select>
+
+    <select id="selectByKey" parameterType="AdmUsrVO" resultMap="AdmUsrMapInfor">
+        select 	/** adm.UserManagementMapper.selectByKey */
+        USR_ID,
+        USR_NM,
+        FULL_NM,
+        <!-- CryptIT.decrypt(USR_PWD, 'SPI') AS USR_PWD, -->
+        COM_USR_DT,
+        COM_USR_SX,
+        CO_TEL_NO,
+        HM_TEL_NO,
+        MPHN_NO,
+        FAX_NO,
+        USR_EML,
+        ACT_FLG,
+        DELT_STS_FLG,
+        IMG_URL,
+        AGE,
+        NTLT,
+        MRR_STS_CD,
+        EDU,
+        HBY,
+        WRK_EXP,
+        HM_ADDR,
+        SPCT,
+        ENG_LVL,
+        SALY_LVL,
+        PRJ_HIS,
+        CNT_CD,
+        CTY_NM,
+        IS_ROOT,
+        TO_CHAR(TO_DATE(BRDY_VAL, 'ddMMyyyy'), 'dd/MM/yyyy') BRDY_VAL,
+        CO_CD,
+        CTRB_PNT_NO,
+        PERF_PNT_NO,
+        cre_usr_id, cre_dt, upd_usr_id, upd_dt,
+        EMPE_NO,
+        to_char(EMPE_ST_DT,'dd/MM/yyyy') EMPE_ST_DT,
+        LOC_CD,
+        NVL(EMPE_TP_CD,'EXP') EMPE_TP_CD, /*BP2252 Kiet Tran*/
+        MONTHS_BETWEEN(SYSDATE, EMPE_ST_DT) WORK_MONTHS_NUMBER,
+        TO_NUMBER(TO_CHAR(EMPE_ST_DT, 'MM')) WORK_START_DAY,
+        TO_DATE(TO_CHAR(sysdate, 'MM/DD/YYYY'),'MM/DD/YYYY') - TO_DATE(TO_CHAR(NVL(EMPE_ST_DT, sysdate), 'MM/DD/YYYY'),'MM/DD/YYYY') DURATION,
+        DVC_TKN_CD,
+        SKY_ID
+
+        from	ADM_USR
+        where	1 = 1
+        and		USR_ID = #{usrId}
+        and     DELT_STS_FLG = 'N'
+        and     ACT_FLG = 'Y'
+    </select>
+
+    <select id="checkUserId" parameterType="AdmUsrVO" resultMap="AdmUsrMapInfor">
+		select 	/** adm.UserManagementMapper.checkUserId */
+				USR_ID,
+				USR_NM,
+				FULL_NM,
+				CryptIT.decrypt(USR_PWD, 'SPI') AS USR_PWD,
+				COM_USR_DT,
+				COM_USR_SX,
+				CO_TEL_NO,
+				HM_TEL_NO,
+				MPHN_NO,
+				FAX_NO,
+				USR_EML,
+				ACT_FLG,
+				DELT_STS_FLG,
+				IMG_URL,
+				AGE,
+				NTLT,
+				MRR_STS_CD,
+				EDU,
+				HBY,
+				WRK_EXP,
+				HM_ADDR,
+				SPCT,
+				ENG_LVL,
+				SALY_LVL,
+				PRJ_HIS,
+				CNT_CD,
+				CTY_NM,
+				IS_ROOT,
+				TO_CHAR(TO_DATE(BRDY_VAL, 'ddMMyyyy'), 'dd/MM/yyyy') BRDY_VAL,
+				CO_CD,
+				CTRB_PNT_NO,
+				PERF_PNT_NO,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt,
+				EMPE_NO,
+				to_char(EMPE_ST_DT,'dd/MM/yyyy') EMPE_ST_DT,
+				LOC_CD,
+				NVL(EMPE_TP_CD,'EXP') EMPE_TP_CD, /*BP2252 Kiet Tran*/
+        		MONTHS_BETWEEN(SYSDATE, EMPE_ST_DT) WORK_MONTHS_NUMBER,
+        		TO_NUMBER(TO_CHAR(EMPE_ST_DT, 'MM')) WORK_START_DAY,
+        		DVC_TKN_CD,
+        		SKY_ID
+
+		from	ADM_USR
+		where	1 = 1
+		and		USR_ID = #{usrId}
+	</select>
+    <!--Select User Information of User by user Id-->
+    <select id="selectByAll" parameterType="AdmUsrVO" resultMap="AdmUsrMapInfor">
+        select 	/** adm.UserManagementMapper.selectByAll */
+        USR_ID,
+        USR_NM,
+        FULL_NM,
+        COM_USR_DT,
+        COM_USR_SX,
+        CO_TEL_NO,
+        HM_TEL_NO,
+        MPHN_NO,
+        FAX_NO,
+        USR_EML,
+        ACT_FLG,
+        DELT_STS_FLG,
+        IMG_URL,
+        AGE,
+        NTLT,
+        MRR_STS_CD,
+        EDU,
+        HBY,
+        WRK_EXP,
+        HM_ADDR,
+        OFC_CD,
+        SPCT,
+        ENG_LVL,
+        SALY_LVL,
+        PRJ_HIS,
+        CNT_CD,
+        CTY_NM,
+        IS_ROOT,
+        TO_CHAR(TO_DATE(BRDY_VAL, 'ddMMyyyy'), 'dd/MM/yyyy') BRDY_VAL,
+        CO_CD,
+        CTRB_PNT_NO,
+        PERF_PNT_NO,
+        cre_usr_id, cre_dt, upd_usr_id, upd_dt,
+        EMPE_NO,
+        <!-- to_char(EMPE_ST_DT,'dd/MM/yyyy') EMPE_ST_DT, -->
+        EMPE_ST_DT,
+        EMPE_END_DT,
+        LOC_CD,
+        EMPE_TP_CD,
+        MONTHS_BETWEEN(SYSDATE, EMPE_ST_DT) WORK_MONTHS_NUMBER,
+        TO_NUMBER(TO_CHAR(EMPE_ST_DT, 'MM')) WORK_START_DAY,
+        DVC_TKN_CD,
+        SKY_ID
+
+        from	ADM_USR
+        where	1 = 1
+        and		USR_ID = #{usrId}
+    </select>
+
+    <resultMap id="AdmUsrMap" type="AdmUsrVO">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="deltStsFlg" column="DELT_STS_FLG" javaType="String"/>
+        <result property="actFlg" column="ACT_FLG" javaType="String"/>
+        <result property="empeNo" column="EMPE_NO" javaType="String"/>
+        <result property="usrCreateDt" column="CRE_DT" javaType="String"/>
+        <result property="strStartDt" column="EMPE_ST_DT"/>
+        <result property="strEndDt" column="EMPE_END_DT"/>
+        <result property="usrDur" column="DURATION" javaType="java.lang.Integer"/>
+        <result property="imgUrl" column="IMG_URL" javaType="String"/>
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+        <result property="usrEml" column="USR_EML"/>
+        <result property="updateDate" column="upd_dt"/>
+    </resultMap>
+    <!--Select User List by Company Code-->
+    <select id="selectUsrList" parameterType="hashMap" resultMap="AdmUsrMap">
+        select /* adm.UserManagementMapper.selectUsrList*/
+        USR_ID,
+        USR_NM,
+        CO_CD,
+        DELT_STS_FLG,
+        ACT_FLG,
+        EMPE_NO,
+        USR_EML,
+        To_Char(CRE_DT,'MM/DD/YYYY') CRE_DT,
+        To_Char(EMPE_ST_DT,'YYYY-MM-DD') EMPE_ST_DT,
+        to_date(to_char(sysdate, 'MM/DD/YYYY'),'MM/DD/YYYY') - to_date(to_char(NVL(EMPE_ST_DT, sysdate), 'MM/DD/YYYY'),'MM/DD/YYYY') DURATION,
+        REPLACE(IMG_URL, '\', '/') IMG_URL,
+        (
+        select
+        adm_team.team_nm
+        from adm_team_usr , adm_team
+        where 1=1
+        and adm_team_usr.TEAM_ID = adm_team.TEAM_ID
+        AND adm_team_usr.APRO_OWNR_FLG = 'Y'
+        AND adm_team_usr.usr_id = ADM_USR.usr_id
+        ) team_nm
+        from ADM_USR
+        Where 1=1
+        AND DELT_STS_FLG &lt;&gt; 'null'
+
+        <if test="orzId != null and orzId != ''">
+            AND USR_ID IN
+            (select tmp.USR_ID from ADM_TEAM_USR tmp
+            WHERE TEAM_ID in (
+            SELECT TEAM_ID
+            FROM adm_team
+            WHERE DELT_STS_FLG    = 'N'
+            START WITH TEAM_ID = #{orzId}
+            CONNECT BY NOCYCLE PRIOR TEAM_ID = PRNT_TEAM_ID
+            )
+            )
+            <!-- and tmp.usr_id = USR.usr_id -->
+            <!-- and tmp.apro_ownr_flg = 'Y' ) -->
+        </if>
+
+        AND IS_ROOT != 'Y'
+        <if test="usrId != null and usrId != ''">
+            AND UPPER(USR_ID) like '%' || UPPER(#{usrId}) || '%'
+        </if>
+        <if test="usrNm != null and usrNm != ''">
+            AND (UPPER(USR_NM) like '%' || UPPER(#{usrNm}) || '%' OR UPPER(EMPE_NO) like '%' || UPPER(#{usrNm}) || '%' )
+        </if>
+        <if test="coCd != null and coCd != ''">
+            AND CO_CD = #{coCd}
+        </if>
+        <if test="brdyVal != null and brdyVal != ''">
+            AND SUBSTR(BRDY_VAL, 0, 4) = SUBSTR(#{brdyVal}, 0, 4)
+        </if>
+        <if test="deltFlg == &quot;N&quot;">
+            AND ACT_FLG = 'Y'
+            AND DELT_STS_FLG = 'N'
+        </if>
+        <!-- 2456: Filter User drop-down list // s -->
+        <if test="allFlg == null or allFlg == ''">
+            AND (
+            <if test="actFlg != null and actFlg != ''">
+                ACT_FLG = 'Y'
+            </if>
+            <if test="dactFlg != null and dactFlg != ''">
+                <if test="actFlg != null and actFlg != ''">
+                    OR ACT_FLG = 'N'
+                </if>
+                <if test="actFlg == null or actFlg == ''">
+                    ACT_FLG = 'N'
+                </if>
+            </if>
+            <if test="deltFlg != null and deltFlg != ''">
+                <if test="actFlg == null or actFlg == ''">
+                    <if test="dactFlg == null or dactFlg == ''">
+                        DELT_STS_FLG = 'Y'
+                    </if>
+                </if>
+                <if test="actFlg == null or actFlg == ''">
+                    <if test="dactFlg != null and dactFlg != ''">
+                        OR DELT_STS_FLG = 'Y'
+                    </if>
+                </if>
+                <if test="dactFlg == null or dactFlg == ''">
+                    <if test="actFlg != null and actFlg != ''">
+                        OR DELT_STS_FLG = 'Y'
+                    </if>
+                </if>
+                <if test="actFlg != null and actFlg != ''">
+                    <if test="dactFlg != null and dactFlg != ''">
+                        OR DELT_STS_FLG = 'Y'
+                    </if>
+                </if>
+            </if>
+            <!-- <if test="deltFlg == null or deltFlg == ''">
+                AND DELT_STS_FLG = 'N'
+            </if> -->
+            )
+        </if>
+        <!-- 2456: Filter User drop-down list // e -->
+        ORDER BY
+        USR_NM
+    </select>
+
+    <!--Select User have  Team Manager-->
+    <select id="selectUsrTeamManager" parameterType="hashMap" resultMap="AdmUsrMap">
+        SELECT *
+        from(
+        select /* adm.UserManagementMapper.selectUsrList*/
+        USR_ID,
+        USR_NM,
+        CO_CD,
+        DELT_STS_FLG,
+        ACT_FLG,
+        EMPE_NO,
+        USR_EML,
+        To_Char(CRE_DT,'MM/DD/YYYY') CRE_DT,
+        <!-- To_Char(EMPE_ST_DT,'YYYY-MM-DD') EMPE_ST_DT, -->
+        EMPE_ST_DT,
+        EMPE_END_DT,
+        CASE
+        WHEN ACT_FLG = 'Y' then TO_DATE(TO_CHAR(sysdate, 'MM/DD/YYYY'),'MM/DD/YYYY') - TO_DATE(TO_CHAR(NVL(EMPE_ST_DT, sysdate),'MM/DD/YYYY'),'MM/DD/YYYY')
+        ELSE TO_DATE(TO_CHAR(NVL(EMPE_END_DT, UPD_DT), 'MM/DD/YYYY'),'MM/DD/YYYY') - TO_DATE(TO_CHAR(NVL(EMPE_ST_DT, sysdate),'MM/DD/YYYY'),'MM/DD/YYYY')
+        END DURATION,
+        REPLACE(IMG_URL, '\', '/') IMG_URL,
+        (
+        select
+        adm_team.team_nm
+        from adm_team_usr , adm_team
+        where 1=1
+        and adm_team_usr.TEAM_ID = adm_team.TEAM_ID
+        AND adm_team_usr.APRO_OWNR_FLG = 'Y'
+        AND adm_team_usr.usr_id = ADM_USR.usr_id
+        ) team_nm
+        from ADM_USR
+        Where 1=1
+        AND DELT_STS_FLG &lt;&gt; 'null'
+
+        <if test="orzId != null and orzId != ''">
+            AND USR_ID IN
+            (select tmp.USR_ID from ADM_TEAM_USR tmp
+            WHERE TEAM_ID in (
+            SELECT TEAM_ID
+            FROM adm_team
+            WHERE DELT_STS_FLG = 'N'
+            START WITH TEAM_ID = #{orzId}
+            CONNECT BY NOCYCLE PRIOR TEAM_ID = PRNT_TEAM_ID
+            )
+            )
+            <!-- and tmp.usr_id = USR.usr_id -->
+            <!-- and tmp.apro_ownr_flg = 'Y' ) -->
+        </if>
+
+        AND IS_ROOT != 'Y'
+        <if test="usrId != null and usrId != ''">
+            AND UPPER(USR_ID) like '%' || UPPER(#{usrId}) || '%'
+        </if>
+        <if test="usrNm != null and usrNm != ''">
+            AND (UPPER(USR_NM) like '%' || UPPER(#{usrNm}) || '%' OR UPPER(EMPE_NO) like '%' || UPPER(#{usrNm}) || '%' )
+        </if>
+        <if test="coCd != null and coCd != ''">
+            AND CO_CD = #{coCd}
+        </if>
+        <if test="brdyVal != null and brdyVal != ''">
+            AND SUBSTR(BRDY_VAL, 0, 4) = SUBSTR(#{brdyVal}, 0, 4)
+        </if>
+        <if test="deltFlg == &quot;N&quot;">
+            AND ACT_FLG = 'Y'
+            AND DELT_STS_FLG = 'N'
+        </if>
+        <!-- 2456: Filter User drop-down list // s -->
+        <if test="allFlg == null or allFlg == ''">
+            AND (
+            <if test="actFlg != null and actFlg != ''">
+                ACT_FLG = 'Y' AND DELT_STS_FLG = 'N'
+            </if>
+            <if test="dactFlg != null and dactFlg != ''">
+                <if test="actFlg != null and actFlg != ''">
+                OR ACT_FLG = 'N'
+            </if>
+            <if test="actFlg == null or actFlg == ''">
+                ACT_FLG = 'N' AND DELT_STS_FLG = 'N'
+            </if>
+            </if>
+            <if test="deltFlg != null and deltFlg != ''">
+                <if test="actFlg == null or actFlg == ''">
+                    <if test="dactFlg == null or dactFlg == ''">
+                        DELT_STS_FLG = 'Y' AND (ACT_FLG = 'N' OR ACT_FLG = 'D')
+                    </if>
+                </if>
+                <if test="actFlg == null or actFlg == ''">
+                    <if test="dactFlg != null and dactFlg != ''">
+                        OR DELT_STS_FLG = 'Y'
+                    </if>
+                </if>
+                <if test="dactFlg == null or dactFlg == ''">
+                    <if test="actFlg != null and actFlg != ''">
+                        OR DELT_STS_FLG = 'Y'
+                    </if>
+                </if>
+                <if test="actFlg != null and actFlg != ''">
+                    <if test="dactFlg != null and dactFlg != ''">
+                        OR DELT_STS_FLG = 'Y'
+                    </if>
+                </if>
+            </if>
+            )
+        </if>
+        UNION
+        select /* adm.UserManagementMapper.selectUsrTeamManager*/
+        USR_ID,
+        USR_NM,
+        CO_CD,
+        DELT_STS_FLG,
+        ACT_FLG,
+        EMPE_NO,
+        USR_EML,
+        To_Char(CRE_DT,'MM/DD/YYYY') CRE_DT,
+        <!-- To_Char(EMPE_ST_DT,'YYYY-MM-DD') EMPE_ST_DT, -->
+        EMPE_ST_DT,
+        EMPE_END_DT,
+        CASE
+        WHEN ACT_FLG = 'Y' then TO_DATE(TO_CHAR(sysdate, 'MM/DD/YYYY'),'MM/DD/YYYY') - TO_DATE(TO_CHAR(NVL(EMPE_ST_DT, sysdate),'MM/DD/YYYY'),'MM/DD/YYYY')
+        ELSE TO_DATE(TO_CHAR(NVL(EMPE_END_DT, UPD_DT), 'MM/DD/YYYY'),'MM/DD/YYYY') - TO_DATE(TO_CHAR(NVL(EMPE_ST_DT, sysdate),'MM/DD/YYYY'),'MM/DD/YYYY')
+        END DURATION,
+        REPLACE(IMG_URL, '\', '/') IMG_URL,
+        (
+        select
+        adm_team.team_nm
+        from adm_team_usr , adm_team
+        where 1=1
+        and adm_team_usr.TEAM_ID = adm_team.TEAM_ID
+        AND adm_team_usr.APRO_OWNR_FLG = 'Y'
+        AND adm_team_usr.usr_id = ADM_USR.usr_id
+        ) team_nm
+        from ADM_USR
+        Where 1=1
+        AND DELT_STS_FLG &lt;&gt; 'null'
+
+        AND IS_ROOT != 'Y'
+        <if test="mgrId != null and mgrId != ''">
+            AND UPPER(USR_ID) like '%' || UPPER(#{mgrId}) || '%'
+        </if>
+        <if test="usrNm != null and usrNm != ''">
+            AND (UPPER(USR_NM) like '%' || UPPER(#{usrNm}) || '%' OR UPPER(EMPE_NO) like '%' || UPPER(#{usrNm}) || '%' )
+        </if>
+        <if test="coCd != null and coCd != ''">
+            AND CO_CD = #{coCd}
+        </if>
+        <if test="deltFlg == &quot;N&quot;">
+            AND ACT_FLG = 'Y'
+            AND DELT_STS_FLG = 'N'
+        </if>
+        <!-- 2456: Filter User drop-down list // s -->
+        <if test="allFlg == null or allFlg == ''">
+            AND (
+            <if test="actFlg != null and actFlg != ''">
+                ACT_FLG = 'Y' AND DELT_STS_FLG = 'N'
+            </if>
+            <if test="dactFlg != null and dactFlg != ''">
+                <if test="actFlg != null and actFlg != ''">
+                    OR ACT_FLG = 'N'
+                </if>
+                <if test="actFlg == null or actFlg == ''">
+                    ACT_FLG = 'N' AND DELT_STS_FLG = 'Y'
+                </if>
+            </if>
+            <if test="deltFlg != null and deltFlg != ''">
+                <if test="actFlg == null or actFlg == ''">
+                    <if test="dactFlg == null or dactFlg == ''">
+                        DELT_STS_FLG = 'Y' AND (ACT_FLG = 'N' OR ACT_FLG = 'D')
+                    </if>
+                </if>
+                <if test="actFlg == null or actFlg == ''">
+                    <if test="dactFlg != null and dactFlg != ''">
+                        OR DELT_STS_FLG = 'Y'
+                    </if>
+                </if>
+                <if test="dactFlg == null or dactFlg == ''">
+                    <if test="actFlg != null and actFlg != ''">
+                        OR DELT_STS_FLG = 'Y'
+                    </if>
+                </if>
+                <if test="actFlg != null and actFlg != ''">
+                    <if test="dactFlg != null and dactFlg != ''">
+                        OR DELT_STS_FLG = 'Y'
+                    </if>
+                </if>
+            </if>
+            )
+        </if>)
+        ORDER BY TO_NUMBER(EMPE_NO)
+    </select>
+
+    <resultMap id="AdmCoMap" type="AdmCoVO">
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="coNm" column="CO_NM" javaType="String"/>
+    </resultMap>
+    <!--Search All team Company-->
+    <select id="searchAllCompany" resultMap="AdmCoMap">
+        /** adm.UserManagementMapper.searchAllCompany*/
+        select
+            CO_CD,
+            CO_NM
+        from ADM_CO
+        where DELT_FLG = 'N'
+        order by
+        CO_NM
+
+    </select>
+
+    <select id="searchCompanyByCocd" resultMap="AdmCoMap" parameterType="hashMap">
+        /** adm.UserManagementMapper.searchCompanyByCocd*/
+        select
+            CO_CD,
+            CO_NM
+        from ADM_CO
+        where DELT_FLG = 'N'
+        AND CO_CD = #{coCd}
+    </select>
+
+    <resultMap id="AdmLocMap" type="AdmLocVO">
+        <result property="locCd" column="LOC_CD" javaType="String"/>
+        <result property="locNm" column="LOC_NM" javaType="String"/>
+    </resultMap>
+    <!--Select all location-->
+    <select id="searchAllLocation" resultMap="AdmLocMap">
+        /** adm.UserManagementMapper.selectLocation*/
+        SELECT
+        loc_cd,
+        loc_nm
+        FROM
+        adm_loc
+        WHERE
+        1 = 1
+        <!-- AND   delt_flg = 'N' -->
+    </select>
+
+    <resultMap id="AdmTeamMap" type="AdmTeamVO">
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+        <result property="prntTeamId" column="PRNT_TEAM_ID" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="teamCd" column="TEAM_CD" javaType="String"/>
+        <result property="teamLvl" column="TEAM_LVL" javaType="java.lang.Integer"/>
+    </resultMap>
+    <!--Select All Team by Company Code-->
+    <select id="searchAllTeamCo" resultMap="AdmTeamMap"  parameterType="map">
+        /**adm.UserManagementMapper.searchAllTeamCo*/
+        SELECT TEAM_ID,
+        TEAM_NM,
+        PRNT_TEAM_ID,
+        CO_CD,
+        TEAM_LVL,
+        TEAM_CD
+        FROM
+        ADM_TEAM
+        WHERE
+        1 = 1
+        AND TEAM.DELT_STS_FLG='N'
+        <if test="coCd !=  null">
+            AND TEAM.CO_CD = #{coCd}
+        </if>
+        START WITH PRNT_TEAM_ID = '0'
+        CONNECT BY NOCYCLE PRIOR TEAM_ID = PRNT_TEAM_ID
+        ORDER SIBLINGS BY ORD_BY_NO
+    </select>
+
+    <!--Select All Team by Company Code follow level.-->
+    <resultMap id="TeamMap2" type="TeamManagementVO">
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="prntTeamId" column="PRNT_TEAM_ID" javaType="String"/>
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+        <result property="teamCd" column="TEAM_CD" javaType="String"/>
+        <result property="teamMgrId" column="TEAM_MGR_ID" javaType="String"/>
+        <result property="teamNmLPAD" column="TEAM_NM_2" javaType="String"/>
+        <result property="path" column="PATH" javaType="String"/>
+        <result property="level" column="LEVEL"/>
+    </resultMap>
+    <select id="searchAllTeamLevelCo" resultMap="TeamMap2"  parameterType="map">
+        /**adm.UserManagementMapper.searchAllTeamLevelCo*/
+        SELECT TEAM.TEAM_ID,
+        TEAM.TEAM_NM,
+        TEAM.PRNT_TEAM_ID,
+        TEAM.CO_CD,
+        TEAM.TEAM_CD,
+        TEAM.TEAM_MGR_ID,
+        level,
+        LPAD(' ┗ ', 2 * level - 1, 's/')
+        || TEAM.TEAM_NM AS TEAM_NM_2,
+        sys_connect_by_path(TEAM.TEAM_NM,' ▶ ') path
+        FROM
+        ADM_TEAM TEAM, ADM_USR USR
+        WHERE
+        1 = 1
+        AND TEAM.DELT_STS_FLG='N'
+        AND USR.USR_ID =  TEAM.TEAM_MGR_ID
+        <if test="coCd !=  null">
+            AND TEAM.CO_CD = #{coCd}
+        </if>
+        START WITH TEAM.PRNT_TEAM_ID = '0'
+        CONNECT BY NOCYCLE PRIOR TEAM.TEAM_ID = TEAM.PRNT_TEAM_ID
+        ORDER SIBLINGS BY ORD_BY_NO
+    </select>
+
+    <resultMap id="selectCompanyUsrListMap" type="AdmUsrVO">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+    </resultMap>
+    <select id="selectCompanyUsrList" parameterType="hashMap" resultMap="selectCompanyUsrListMap">
+        select 	/** adm.UserManagementMapper.selectCompanyUsrList */
+        USR_ID,
+        USR_NM,
+        CO_CD
+        from	ADM_USR
+        where	1=1
+        AND ACT_FLG = 'Y'
+        and DELT_STS_FLG = 'N'
+        <if test="coCd != null and coCd != ''">
+            AND CO_CD = #{coCd}
+        </if>
+        ORDER BY
+        USR_ID,
+        USR_NM
+    </select>
+
+    <resultMap id="UsrRoleMap" type="AdmUsrRoleVO">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="roleId" column="ROLE_ID" javaType="String"/>
+    </resultMap>
+    <!--Select role list of User-->
+    <select id="selectUsrRoleList" parameterType="hashMap" resultMap="UsrRoleMap">
+        select 	/** adm.UserManagementMapper.selectUsrRoleList */
+        usrRole.USR_ID,
+        usrRole.ROLE_ID
+        from	ADM_USR_ROLE usrRole, ADM_ROLE role
+        where	1 = 1
+        and		usrRole.USR_ID = #{usrId}
+        and 	usrRole.ROLE_ID =  role.ROLE_ID
+        <if test="roleTpCd != null and roleTpCd != ''">
+            AND role.ROLE_TP_CD = #{roleTpCd}
+        </if>
+    </select>
+
+    <resultMap id="teamMap" type="AdmTeamVO">
+        <result property="userId" column="USR_ID" javaType="String"/>
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+    </resultMap>
+    <!--Select Team List of User-->
+    <select id="selectUsrTeamList" resultMap="teamMap" parameterType="map">
+		SELECT /**adm.UserManagementMapper.selectUsrTeamList*/
+				TEAM.TEAM_ID, TUSR.USR_ID,
+				TEAM_CD || ' (' || TEAM_NM || ')' TEAM_NM
+		FROM ADM_TEAM_USR TUSR, ADM_TEAM TEAM
+		WHERE TEAM.TEAM_ID = TUSR.TEAM_ID
+			AND TUSR.USR_ID = #{usrId}
+		ORDER BY APRO_OWNR_FLG DESC
+	</select>
+
+    <!--Select Main Team of User-->
+    <select id="selectUsrMainTeam" resultMap="teamMap">
+		SELECT /**adm.UserManagementMapper.selectUsrMainTeam*/
+				TEAM.TEAM_ID, TUSR.USR_ID, TEAM_NM
+		FROM ADM_TEAM_USR TUSR, ADM_TEAM TEAM
+		WHERE TEAM.TEAM_ID = TUSR.TEAM_ID
+			AND TUSR.USR_ID = #{usrId}
+			AND APRO_OWNR_FLG = 'Y'
+	</select>
+
+    <resultMap id="TeamUserHistoryVOMap" type="TeamUserHistoryVO">
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+        <result property="preTeamNm" column="PRE_TEAM_NM" javaType="String"/>
+        <result property="aplyStDt" column="APLY_ST_DT" javaType="java.sql.Date"/>
+        <result property="aplyEndDt" column="APLY_END_DT" javaType="java.sql.Date"/>
+        <result property="aproOwnrFlg" column="APRO_OWNR_FLG" javaType="String"/>
+        <result property="wrkFlg" column="WRK_FLG" javaType="String"/>
+        <result property="createDate" column="CRE_DT" />
+        <result property="updateDate" column="UPD_DT"/>
+    </resultMap>
+    <!--search Team History-->
+    <select id="searchTeamHistory" parameterType="map" resultMap="TeamUserHistoryVOMap">
+        SELECT
+        /** adm.UserManagementMapper.searchTeamHistory */
+        TEAM_ID,
+        (SELECT TEAM_NM
+        FROM ADM_TEAM
+        WHERE TEAM_ID = his.TEAM_ID
+        ) TEAM_NM,
+        (SELECT TEAM_NM FROM ADM_TEAM WHERE TEAM_ID = his.PRE_TEAM_ID
+        ) PRE_TEAM_NM,
+        APLY_ST_DT,
+        APLY_END_DT,
+        APRO_OWNR_FLG,
+        WRK_FLG,
+        CRE_DT,
+        UPD_DT
+        FROM ADM_TEAM_USR_HIS his
+        WHERE 1 = 1
+        AND USR_ID = #{userId}
+        <!-- AND APLY_ST_DT  BETWEEN
+            TO_DATE(TO_CHAR((select CRE_DT from adm_usr where usr_id = #{userId}),'MM-DD-YYYY'),'MM-DD-YYYY')
+            AND TO_DATE(TO_CHAR(sysdate,'MM-DD-YYYY'),'MM-DD-YYYY') -->
+        ORDER BY TEAM_USR_HIS_ID
+    </select>
+
+    <resultMap id="AdmUsrMapNoTeam" type="AdmUsrVO">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="usrPwd" column="USR_PWD" javaType="String"/>
+        <result property="comUsrDt" column="COM_USR_DT" javaType="String"/>
+        <result property="comUsrSx" column="COM_USR_SX" javaType="String"/>
+        <result property="coTelNo" column="CO_TEL_NO" javaType="String"/>
+        <result property="hmTelNo" column="HM_TEL_NO" javaType="String"/>
+        <result property="mphnNo" column="MPHN_NO" javaType="String"/>
+        <result property="faxNo" column="FAX_NO" javaType="String"/>
+        <result property="usrEml" column="USR_EML" javaType="String"/>
+        <result property="actFlg" column="ACT_FLG" javaType="String"/>
+        <result property="deltStsFlg" column="DELT_STS_FLG" javaType="String"/>
+        <result property="imgUrl" column="IMG_URL" javaType="String"/>
+        <result property="age" column="AGE" javaType="Integer"/>
+        <result property="ntlt" column="NTLT" javaType="String"/>
+        <result property="mrrStsCd" column="MRR_STS_CD" javaType="String"/>
+        <result property="edu" column="EDU" javaType="String"/>
+        <result property="hby" column="HBY" javaType="String"/>
+        <result property="wrkExp" column="WRK_EXP" javaType="String"/>
+        <result property="hmAddr" column="HM_ADDR" javaType="String"/>
+        <result property="spct" column="SPCT" javaType="String"/>
+        <result property="engLvl" column="ENG_LVL" javaType="String"/>
+        <result property="salyLvl" column="SALY_LVL" javaType="String"/>
+        <result property="prjHis" column="PRJ_HIS" javaType="String"/>
+        <result property="cntCd" column="CNT_CD" javaType="String"/>
+        <result property="ctyNm" column="CTY_NM" javaType="String"/>
+        <result property="isRoot" column="IS_ROOT" javaType="String"/>
+        <result property="brdyVal" column="BRDY_VAL" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="ctrbPntNo" column="CTRB_PNT_NO" javaType="Double"/>
+        <result property="perfPntNo" column="PERF_PNT_NO" javaType="Double"/>
+        <result property="createUser" column="cre_usr_id"/>
+        <result property="updateUser" column="upd_usr_id"/>
+        <result property="createDate" column="cre_dt"/>
+        <result property="updateDate" column="upd_dt"/>
+        <result property="usrNo" column="EMPE_NO"/>
+        <result property="fullNm" column="FULL_NM" javaType="String"/>
+        <result property="usrSkypeId" column="SKY_ID" javaType="String"/>
+    </resultMap>
+    <!--Check User Code-->
+    <select id="checkUserCode"  resultMap="AdmUsrMapNoTeam">
+        SELECT /**adm.UserManagementMapper.checkUserCode*/
+        USR_ID,
+        USR_NM,
+        CryptIT.decrypt(USR_PWD, 'SPI') AS USR_PWD,
+        COM_USR_DT,
+        COM_USR_SX,
+        CO_TEL_NO,
+        HM_TEL_NO,
+        MPHN_NO,
+        FAX_NO,
+        USR_EML,
+        ACT_FLG,
+        DELT_STS_FLG,
+        IMG_URL,
+        AGE,
+        NTLT,
+        MRR_STS_CD,
+        EDU,
+        HBY,
+        WRK_EXP,
+        HM_ADDR,
+        SPCT,
+        ENG_LVL,
+        SALY_LVL,
+        PRJ_HIS,
+        CNT_CD,
+        CTY_NM,
+        IS_ROOT,
+        BRDY_VAL,
+        CO_CD,
+        CTRB_PNT_NO,
+        PERF_PNT_NO,
+        cre_usr_id, cre_dt, upd_usr_id, upd_dt,
+        EMPE_NO,
+        FULL_NM,
+        SKY_ID
+        FROM ADM_USR
+        WHERE CO_CD = #{comCd}
+        AND EMPE_NO = #{usrCd}
+        <if test="usrId != null and usrId != ''">
+            AND USR_ID != #{usrId}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="AdmUsrVO">
+        insert  /** adm.UserManagementMapper.insert */
+        into ADM_USR(
+        USR_ID,
+        <if test="usrNm != null and usrNm != ''">
+            USR_NM,
+        </if>
+        <if test="fullNm != null and fullNm != ''">
+            FULL_NM,
+        </if>
+        <if test="usrPwd != null and usrPwd != ''">
+            USR_PWD,
+        </if>
+        <if test="comUsrDt != null and comUsrDt != ''">
+            COM_USR_DT,
+        </if>
+        <if test="comUsrSx != null and comUsrSx != ''">
+            COM_USR_SX,
+        </if>
+        <if test="coTelNo != null and coTelNo != ''">
+            CO_TEL_NO,
+        </if>
+        <if test="hmTelNo != null and hmTelNo != ''">
+            HM_TEL_NO,
+        </if>
+        <if test="mphnNo != null and mphnNo != ''">
+            MPHN_NO,
+        </if>
+        <if test="faxNo != null and faxNo != ''">
+            FAX_NO,
+        </if>
+        <if test="usrEml != null and usrEml != ''">
+            USR_EML,
+        </if>
+        <if test="actFlg != null and actFlg != ''">
+            ACT_FLG,
+        </if>
+        <if test="deltStsFlg != null and deltStsFlg != ''">
+            DELT_STS_FLG,
+        </if>
+        <if test="imgUrl != null and imgUrl != ''">
+            IMG_URL,
+        </if>
+        <if test="age != null and age != ''">
+            AGE,
+        </if>
+        <if test="ntlt != null and ntlt != ''">
+            NTLT,
+        </if>
+        <if test="mrrStsCd != null and mrrStsCd != ''">
+            MRR_STS_CD,
+        </if>
+        <if test="edu != null and edu != ''">
+            EDU,
+        </if>
+        <if test="hby != null and hby != ''">
+            HBY,
+        </if>
+        <if test="wrkExp != null and wrkExp != ''">
+            WRK_EXP,
+        </if>
+        <if test="hmAddr != null and hmAddr != ''">
+            HM_ADDR,
+        </if>
+        <if test="spct != null and spct != ''">
+            SPCT,
+        </if>
+        <if test="engLvl != null and engLvl != ''">
+            ENG_LVL,
+        </if>
+        <if test="salyLvl != null and salyLvl != ''">
+            SALY_LVL,
+        </if>
+        <if test="prjHis != null and prjHis != ''">
+            PRJ_HIS,
+        </if>
+        <if test="cntCd != null and cntCd != ''">
+            CNT_CD,
+        </if>
+        <if test="ctyNm != null and ctyNm != ''">
+            CTY_NM,
+        </if>
+        <if test="isRoot != null and isRoot != ''">
+            IS_ROOT,
+        </if>
+        <if test="brdyVal != null and brdyVal != ''">
+            BRDY_VAL,
+        </if>
+        <if test="coCd != null and coCd != ''">
+            CO_CD,
+        </if>
+        <if test="ctrbPntNo != null and ctrbPntNo != ''">
+            CTRB_PNT_NO,
+        </if>
+        <if test="perfPntNo != null and perfPntNo != ''">
+            PERF_PNT_NO,
+        </if>
+        <if test="usrNo != null and usrNo != ''">
+            EMPE_NO,
+        </if>
+        <if test="strStartDt != null and strStartDt != ''">
+            EMPE_ST_DT,
+        </if>
+        EMPE_END_DT,
+        ADD_PRBTN_VAC_FLG,
+        <if test="locCd != null and locCd != ''">
+            LOC_CD,
+        </if>
+        <if test="empeTpCd != null and empeTpCd != ''">
+            EMPE_TP_CD,
+        </if>
+        <if test="usrSkypeId != null and usrSkypeId != ''">
+            SKY_ID,
+        </if>
+        <if test="ofcCd != null and ofcCd != ''">
+            OFC_CD,
+        </if>
+        cre_usr_id, cre_dt, upd_usr_id, upd_dt
+        )
+        values(
+        #{usrId},
+        <if test="usrNm != null and usrNm != ''">
+            #{usrNm},
+        </if>
+        <if test="fullNm != null and fullNm != ''">
+            #{fullNm},
+        </if>
+        <if test="usrPwd != null and usrPwd != ''">
+            CryptIT.encrypt(#{usrPwd}, 'SPI'),
+        </if>
+        <if test="comUsrDt != null and comUsrDt != ''">
+            #{comUsrDt},
+        </if>
+        <if test="comUsrSx != null and comUsrSx != ''">
+            #{comUsrSx},
+        </if>
+        <if test="coTelNo != null and coTelNo != ''">
+            #{coTelNo},
+        </if>
+        <if test="hmTelNo != null and hmTelNo != ''">
+            #{hmTelNo},
+        </if>
+        <if test="mphnNo != null and mphnNo != ''">
+            #{mphnNo},
+        </if>
+        <if test="faxNo != null and faxNo != ''">
+            #{faxNo},
+        </if>
+        <if test="usrEml != null and usrEml != ''">
+            #{usrEml},
+        </if>
+        <if test="actFlg != null and actFlg != ''">
+            #{actFlg},
+        </if>
+        <if test="deltStsFlg != null and deltStsFlg != ''">
+            #{deltStsFlg},
+        </if>
+        <if test="imgUrl != null and imgUrl != ''">
+            #{imgUrl},
+        </if>
+        <if test="age != null and age != ''">
+            #{age},
+        </if>
+        <if test="ntlt != null and ntlt != ''">
+            #{ntlt},
+        </if>
+        <if test="mrrStsCd != null and mrrStsCd != ''">
+            #{mrrStsCd},
+        </if>
+        <if test="edu != null and edu != ''">
+            #{edu},
+        </if>
+        <if test="hby != null and hby != ''">
+            #{hby},
+        </if>
+        <if test="wrkExp != null and wrkExp != ''">
+            #{wrkExp},
+        </if>
+        <if test="hmAddr != null and hmAddr != ''">
+            #{hmAddr},
+        </if>
+        <if test="spct != null and spct != ''">
+            #{spct},
+        </if>
+        <if test="engLvl != null and engLvl != ''">
+            #{engLvl},
+        </if>
+        <if test="salyLvl != null and salyLvl != ''">
+            #{salyLvl},
+        </if>
+        <if test="prjHis != null and prjHis != ''">
+            #{prjHis},
+        </if>
+        <if test="cntCd != null and cntCd != ''">
+            #{cntCd},
+        </if>
+        <if test="ctyNm != null and ctyNm != ''">
+            #{ctyNm},
+        </if>
+        <if test="isRoot != null and isRoot != ''">
+            #{isRoot},
+        </if>
+        <if test="brdyVal != null and brdyVal != ''">
+            #{brdyVal},
+        </if>
+        <if test="coCd != null and coCd != ''">
+            #{coCd},
+        </if>
+        <if test="ctrbPntNo != null and ctrbPntNo != ''">
+            #{ctrbPntNo},
+        </if>
+        <if test="perfPntNo != null and perfPntNo != ''">
+            #{perfPntNo},
+        </if>
+        <if test="usrNo != null and usrNo != ''">
+            #{usrNo},
+        </if>
+        <if test="strStartDt != null and strStartDt != ''">
+            to_date(#{strStartDt},'YYYY-MM-DD HH24:MI'),
+        </if>
+        to_date(#{strEndDt},'YYYY-MM-DD HH24:MI'),
+        'N',
+        <if test="locCd != null and locCd != ''">
+            #{locCd},
+        </if>
+        <if test="empeTpCd != null and empeTpCd != ''">
+            #{empeTpCd},
+        </if>
+        <if test="usrSkypeId != null and usrSkypeId != ''">
+            #{usrSkypeId},
+        </if>
+        <if test="ofcCd != null and ofcCd != ''">
+            #{ofcCd},
+        </if>
+        #{createUser}, sysdate, #{updateUser}, sysdate
+        )
+    </insert>
+
+    <insert id="insertTatVacVO" parameterType="TatVacVO">
+        /**adm.UserManagementMapper.insert TatVac.insert*/
+        insert
+        into TAT_VAC(
+        VAC_YR,
+        USR_ID,
+        PRE_USD_DYS,
+        ADJ_DYS,
+        USD_DYS,
+        VAC_RMK,
+        LVE_TP_CD,
+        RMN_DYS,
+        PRE_RMN_DYS,
+        CO_CD,
+        <if test="currentRemainsDays != null and currentRemainsDays != ''">
+            CRNT_RMN_DYS,
+        </if>
+        <if test="nxtRmnDys != null and nxtRmnDys != ''">
+            NXT_RMN_DYS,
+        </if>
+        <if test="nxtUsdDys != null and nxtUsdDys != ''">
+            NXT_USD_DYS,
+        </if>
+        cre_usr_id, cre_dt, upd_usr_id, upd_dt
+        )
+        values(
+        #{vctYr},
+        #{empeId},
+        #{preUsdDys},
+        NVL(#{adjDys}, 0),
+        #{usdDys},
+        <if test="adjDaysTmp != null and adjDaysTmp != ''">
+            #{rmk} || ' (' || #{adjDaysTmp} || ')',
+        </if>
+        <if test="adjDaysTmp == null or adjDaysTmp == ''">
+            #{rmk},
+        </if>
+        #{lveTpCd},
+        #{rmnDys},
+        #{preRmnDys},
+        #{coCd},
+        <if test="currentRemainsDays != null and currentRemainsDays != ''">
+            NVL(#{currentRemainsDays}, 0),
+        </if>
+        <if test="nxtRmnDys != null and nxtRmnDys != ''">
+            NVL(#{nxtRmnDys}, 0),
+        </if>
+        <if test="nxtUsdDys != null and nxtUsdDys != ''">
+            NVL(#{nxtUsdDys}, 0),
+        </if>
+        #{createUser}, sysdate, #{updateUser}, sysdate
+        )
+    </insert>
+
+    <update id="updateWithMap" parameterType="map">
+        update  /** adm.UserManagementMapper.updateWithMap */
+        ADM_USR set
+        <if test="usrId != null and usrId != ''">
+            USR_ID = #{usrId},
+        </if>
+        <if test="usrNm != null and usrNm != ''">
+            USR_NM = #{usrNm},
+        </if>
+        <if test="fullNm != null and fullNm != ''">
+            FULL_NM = #{fullNm},
+        </if>
+        <if test="usrPwd != null and usrPwd != ''">
+            USR_PWD = CryptIT.encrypt(#{usrPwd}, 'SPI'),
+        </if>
+        <if test="comUsrDt != null and comUsrDt != ''">
+            COM_USR_DT = #{comUsrDt},
+        </if>
+        <if test="comUsrSx != null and comUsrSx != ''">
+            COM_USR_SX = #{comUsrSx},
+        </if>
+        <if test="coTelNo != null and coTelNo != ''">
+            CO_TEL_NO = #{coTelNo},
+        </if>
+        <if test="hmTelNo != null and hmTelNo != ''">
+            HM_TEL_NO = #{hmTelNo},
+        </if>
+        <if test="mphnNo != null">
+            MPHN_NO = #{mphnNo},
+        </if>
+        <if test="faxNo != null and faxNo != ''">
+            FAX_NO = #{faxNo},
+        </if>
+        <if test="usrEml != null and usrEml != ''">
+            USR_EML = #{usrEml},
+        </if>
+        <if test="actFlg != null and actFlg != ''">
+            ACT_FLG = #{actFlg},
+        </if>
+        <if test="deltStsFlg != null and deltStsFlg != ''">
+            DELT_STS_FLG = #{deltStsFlg},
+        </if>
+        <if test="imgUrl != null and imgUrl != ''">
+            IMG_URL = #{imgUrl},
+        </if>
+        <if test="age != null and age != ''">
+            AGE = #{age},
+        </if>
+        <if test="ntlt != null and ntlt != ''">
+            NTLT = #{ntlt},
+        </if>
+        <if test="mrrStsCd != null and mrrStsCd != ''">
+            MRR_STS_CD = #{mrrStsCd},
+        </if>
+        <if test="edu != null and edu != ''">
+            EDU = #{edu},
+        </if>
+        <if test="hby != null and hby != ''">
+            HBY = #{hby},
+        </if>
+        <if test="wrkExp != null and wrkExp != ''">
+            WRK_EXP = #{wrkExp},
+        </if>
+        <if test="hmAddr != null">
+            HM_ADDR = #{hmAddr},
+        </if>
+        <if test="spct != null and spct != ''">
+            SPCT = #{spct},
+        </if>
+        <if test="engLvl != null and engLvl != ''">
+            ENG_LVL = #{engLvl},
+        </if>
+        <if test="salyLvl != null and salyLvl != ''">
+            SALY_LVL = #{salyLvl},
+        </if>
+        <if test="prjHis != null and prjHis != ''">
+            PRJ_HIS = #{prjHis},
+        </if>
+        <if test="cntCd != null">
+            CNT_CD = #{cntCd},
+        </if>
+        <if test="ctyNm != null">
+            CTY_NM = #{ctyNm},
+        </if>
+        <if test="isRoot != null and isRoot != ''">
+            IS_ROOT = #{isRoot},
+        </if>
+        <if test="brdyVal != null">
+            BRDY_VAL = #{brdyVal},
+        </if>
+        <if test="coCd != null and coCd != ''">
+            CO_CD = #{coCd},
+        </if>
+        <if test="ctrbPntNo != null and ctrbPntNo != ''">
+            CTRB_PNT_NO = #{ctrbPntNo},
+        </if>
+        <if test="perfPntNo != null and perfPntNo != ''">
+            PERF_PNT_NO = #{perfPntNo},
+        </if>
+        <if test="locCd != null">
+            LOC_CD = #{locCd},
+        </if>
+        <if test="empeTpCd != null and empeTpCd != ''">
+            EMPE_TP_CD = #{empeTpCd},
+        </if>
+        <if test="usrSkypeId != null">
+            SKY_ID = #{usrSkypeId},
+        </if>
+        <if test="ofcCd != null and ofcCd != ''">
+            OFC_CD = #{ofcCd},
+        </if>
+        <if test="usrNo != null">
+            EMPE_NO = #{usrNo},
+        </if>
+        <if test="strStartDt != null and strStartDt != ''">
+            EMPE_ST_DT = to_date(#{strStartDt},'YYYY-MM-DD HH24:MI'),
+        </if>
+         EMPE_END_DT = to_date(#{strEndDt},'YYYY-MM-DD HH24:MI'),
+        upd_usr_id = #{updateUser},
+        upd_dt = sysdate
+        where	1 = 1
+        and		USR_ID = #{usrId}
+    </update>
+
+    <delete id="deleteUserRoleVO" parameterType="AdmUsrRoleVO">
+		delete  /**adm.UserManagementMapper AdmUsrRole.delete */
+		ADM_USR_ROLE
+		where	1 = 1
+		and		USR_ID = #{usrId}
+		and		ROLE_ID = #{roleId}
+	</delete>
+
+    <insert id="insertUserRoleVO" parameterType="AdmUsrRoleVO">
+		insert  /**adm.UserManagementMapper AdmUsrRole.insert */
+		into ADM_USR_ROLE(
+				USR_ID,
+				ROLE_ID,
+				cre_usr_id, cre_dt, upd_usr_id, upd_dt
+				)
+		values(
+				#{usrId},
+				#{roleId},
+				#{createUser}, sysdate, #{updateUser}, sysdate
+				)
+	</insert>
+
+    <!--Delete Project of user By key-->
+    <delete id="deleteAdmPjtUsrByKey" parameterType="AdmPjtUsrVO">
+        delete /** adm.UserManagementMapper UserManagement.deleteAdmPjtUsrByKey */
+        ADM_PJT_USR
+        where 1 = 1
+        <if test="mode == 3">
+            <if test="usrId != null and usrId != ''">
+                and USR_ID = #{usrId}
+            </if>
+            AND PJT_ID IN(
+            SELECT PJT_ID
+            FROM ADM_PJT
+            WHERE 1 = 1
+            AND PJT_TP_CD = 'ADM_PJT_TPPJT' AND USE_FLG = 'Y'
+            START WITH PJT_ID = #{pjtId}
+            CONNECT BY NOCYCLE PRIOR PJT_ID = PRNT_PJT_ID)
+            AND ROLE_ID &lt;&gt;
+            'PJT_USR_RLPM'
+            <if test="roleId != null and roleId != ''">
+                and ROLE_ID = #{roleId}
+            </if>
+        </if>
+
+        <if test="mode == 0">
+            <if test="usrId != null and usrId != ''">
+                and USR_ID = #{usrId}
+            </if>
+            <if test="pjtId != null and pjtId != ''">
+                and PJT_ID = #{pjtId}
+                and ROLE_ID &lt;&gt;
+                'PJT_USR_RLPM'
+            </if>
+            <if test="roleId != null and roleId != ''">
+                and ROLE_ID = #{roleId}
+            </if>
+        </if>
+    </delete>
+
+    <!--Delete User By Id-->
+    <delete id="deleteByUsrId" parameterType="map">
+		delete  /** adm.UserManagementMapper.deleteByUsrId */
+		ADM_TEAM_USR
+		where	1 = 1
+		and		USR_ID = #{usrId}
+	</delete>
+
+    <!--Delete User role by Key-->
+    <delete id="deleteAdmUsrRoleByKey" parameterType="AdmUsrRoleVO">
+        delete  /** adm.UserManagementMapper.deleteAdmUsrRoleByKey */
+        ADM_USR_ROLE
+        where	1 = 1
+        and		USR_ID = #{usrId}
+        <if test="roleId != null and roleId != ''">
+            and		ROLE_ID = #{roleId}
+        </if>
+    </delete>
+
+    <update id="resetPassword" parameterType="String">
+		UPDATE adm_usr
+		SET USR_PWD  = cryptit.encrypt(#{pwd}, 'SPI')
+		WHERE usr_id = #{usrId}
+	</update>
+
+    <resultMap type="TatEmpVo" id="allNewEmpeMap">
+        <result property="empeId" column="USR_ID" javaType="String"/>
+        <result property="empStartDt" column="EMPE_ST_DT" javaType="java.util.Date"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="empeTpCd" column="EMPE_TP_CD" javaType="String"/>
+        <result property="monthWrk" column="MONTH_WRK" javaType="Float"/>
+    </resultMap>
+    <select id="selectAllNewEmpe" parameterType="hashMap" resultMap="allNewEmpeMap">
+        /** sqlMapTatEmp.selectAllNewEmpe */
+        select USR_ID,
+        EMPE_ST_DT,
+        EMPE_TP_CD,
+        round(MONTHS_BETWEEN((TO_DATE(TO_CHAR(NVL(#{sysDate},SYSDATE), 'MM/DD/YYYY'), 'MM/DD/YYYY')), EMPE_ST_DT), 2) as MONTH_WRK,
+        CO_CD
+        from ADM_USR
+        where ACT_FLG = 'Y'
+        AND DELT_STS_FLG = 'N'
+        and ADD_PRBTN_VAC_FLG='N'
+        <if test="coCd != null and coCd!= ''">
+            and CO_CD = #{coCd}
+        </if>
+        AND CO_CD IN (	SELECT CD.COM_CD
+        FROM ADM_COM_CD CD
+        WHERE 1 = 1
+        AND CD.PRNT_CD = 'COM_SITE_CD'
+        )
+        AND EMPE_ST_DT IS NOT NULL
+    </select>
+
+    <update id="updateNewEmpeRemainFlag" parameterType="hashMap">
+		update  /** sqlMapTatEmp.updateWithMap */
+		ADM_USR set
+			ADD_PRBTN_VAC_FLG ='Y'
+		where	1 = 1
+		and		USR_ID = #{empeId}
+	</update>
+
+    <select id="selectAll" resultMap="AdmUsrMap" parameterType="HashMap">
+        select 	/** AdmUsr.selectAll */
+        USR_ID,
+        USR_NM,
+        FULL_NM,
+        CryptIT.decrypt(USR_PWD, 'SPI') AS USR_PWD,
+        COM_USR_DT,
+        COM_USR_SX,
+        CO_TEL_NO,
+        HM_TEL_NO,
+        MPHN_NO,
+        FAX_NO,
+        USR_EML,
+        ACT_FLG,
+        DELT_STS_FLG,
+        IMG_URL,
+        AGE,
+        NTLT,
+        MRR_STS_CD,
+        EDU,
+        HBY,
+        WRK_EXP,
+        HM_ADDR,
+        SPCT,
+        ENG_LVL,
+        SALY_LVL,
+        PRJ_HIS,
+        CNT_CD,
+        CTY_NM,
+        IS_ROOT,
+        BRDY_VAL,
+        CO_CD,
+        CTRB_PNT_NO,
+        PERF_PNT_NO,
+        cre_usr_id, cre_dt, upd_usr_id, upd_dt,
+        EMPE_NO,
+        to_char(EMPE_ST_DT,'DD/MM/YYYY') EMPE_ST_DT,
+        LOC_CD,
+        EMPE_TP_CD,
+        MONTHS_BETWEEN(SYSDATE, EMPE_ST_DT) WORK_MONTHS_NUMBER,
+        TO_NUMBER(TO_CHAR(EMPE_ST_DT, 'MM')) WORK_START_DAY,
+        DVC_TKN_CD,
+        SKY_ID
+        from	ADM_USR
+        where	1 = 1
+        <if test="coCd != null and coCd!= ''  ">
+            and 	CO_CD = #{coCd}
+        </if>
+    </select>
+
+    <resultMap type="AdmOfficeVo" id="admOfficeMap">
+        <result property="ofcCd" column="OFC_CD" javaType="String"/>
+        <result property="ofcNm" column="OFC_NM" javaType="String"/>
+    </resultMap>
+
+    <select id= "getListOfficeByCompany" parameterType = "String" resultMap = "admOfficeMap">
+        select OFC_CD,NVL(OFC_NM,'') OFC_NM from ADM_OFC where CO_CD = #{coCd} AND ACT_FLG = 'Y' order by OFC_NM
+    </select>
+
+    <resultMap id="selectUsrIdUsrnameForFacial" type="Facial">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+        <result property="usrNm" column="USR_NM" javaType="String"/>
+        <result property="teamId" column="TEAM_ID" javaType="String"/>
+        <result property="actFlg" column="ACT_FLG" javaType="String"/>
+        <result property="teamNm" column="TEAM_NM" javaType="String"/>
+        <result property="coCd" column="CO_CD" javaType="String"/>
+        <result property="fullNm" column="FULL_NM" javaType="String"/>
+        <result property="ofcCd" column="OFC_CD" javaType="String"/>
+        <result property="comUsrSx" column="COM_USR_SX" javaType="String"/>
+        <result property="brdyVal" column="BRDY_VAL" javaType="String"/>
+        <result property="usrEml" column="USR_EML" javaType="String"/>
+    </resultMap>
+
+    <select id= "getListUsrid" resultMap = "selectUsrIdUsrnameForFacial">
+        /** UserManagementMapper.getListUsrid */
+        SELECT
+            au.usr_id,
+            au.usr_nm,
+            au.ACT_FLG,
+            au.CO_CD,
+            au.FULL_NM,
+            au.OFC_CD,
+            au.COM_USR_SX,
+            au.BRDY_VAL,
+            au.USR_EML,
+            at.team_id,
+            at.team_nm
+        FROM
+            adm_usr au
+            LEFT OUTER JOIN (
+                SELECT
+                    adm_team_usr.usr_id,
+                    adm_team_usr.team_id
+                FROM
+                    adm_team_usr
+                WHERE
+                    adm_team_usr.apro_ownr_flg = 'Y'
+            ) atu ON au.usr_id = atu.usr_id
+            LEFT OUTER JOIN adm_team at ON at.team_id = atu.team_id
+        WHERE 1= 1
+            AND   au.is_root = 'N'
+        ORDER BY
+            au.usr_id
+    </select>
+
+    <select id="selectZoneNameByUserId" parameterType="String" resultType="String">
+        SELECT DISTINCT ZN_NM
+        FROM ADM_LOC
+        WHERE LOC_CD = (
+                            SELECT DISTINCT LOC_CD
+                            FROM adm_usr
+                            WHERE usr_id = #{usrId}
+                        )
+    </select>
+
+    <select id="selectDurationByUsrId" parameterType="String" resultType="Integer">
+        SELECT
+            CASE
+                WHEN ACT_FLG = 'Y' then TO_DATE(TO_CHAR(sysdate, 'MM/DD/YYYY'),'MM/DD/YYYY') - TO_DATE(TO_CHAR(NVL(EMPE_ST_DT, sysdate),'MM/DD/YYYY'),'MM/DD/YYYY')
+                ELSE TO_DATE(TO_CHAR(NVL(EMPE_END_DT, UPD_DT), 'MM/DD/YYYY'),'MM/DD/YYYY') - TO_DATE(TO_CHAR(NVL(EMPE_ST_DT, sysdate),'MM/DD/YYYY'),'MM/DD/YYYY')
+            END DURATION
+        FROM ADM_USR
+        WHERE 1  = 1
+        AND USR_ID = #{usrId}
+    </select>
+
+    <select id="searchUserListExport" parameterType="map" resultMap="AdmUsrMapInfor">
+        SELECT USR_ID,
+        USR_NM,
+        FULL_NM,
+        CASE
+        WHEN ACT_FLG = 'Y' then 'Yes'
+        ELSE 'No'
+        END ACT_FLG,
+        CASE
+        WHEN COM_USR_SX IS NULL then ''
+        WHEN COM_USR_SX = 'M' then 'Male'
+        ELSE 'Female'
+        END COM_USR_SX,
+        TO_CHAR(TO_DATE(BRDY_VAL, 'ddMMyyyy'), 'MM/DD/YYYY') BRDY_VAL,
+        HM_ADDR,
+        CTY_NM,
+        CNT_CD,
+        LOC_CD,
+        USR_EML,
+        MPHN_NO,
+        SKY_ID,
+        CO_CD,
+        EMPE_NO,
+        EMPE_TP_CD,
+        TO_CHAR(EMPE_ST_DT, 'MM/DD/YYYY') EMPE_ST_DT,
+        TO_CHAR(EMPE_END_DT, 'MM/DD/YYYY') EMPE_END_DT,
+        (SELECT Role.ROLE_NM FROM ADM_USR_ROLE usrRole, ADM_ROLE role WHERE 1 = 1 AND usrRole.USR_ID  = adm.USR_ID AND usrRole.ROLE_ID = role.ROLE_ID) ROLE_NM,
+        OFC_CD,
+        (SELECT TEAM_NM FROM ADM_TEAM_USR TUSR, ADM_TEAM TEAM WHERE TEAM.TEAM_ID = TUSR.TEAM_ID AND TUSR.USR_ID = adm.USR_ID AND APRO_OWNR_FLG = 'Y') TEAM_NM,
+        CASE
+        WHEN ACT_FLG = 'Y' then TO_DATE(TO_CHAR(sysdate, 'MM/DD/YYYY'),'MM/DD/YYYY') - TO_DATE(TO_CHAR(NVL(EMPE_ST_DT, sysdate),'MM/DD/YYYY'),'MM/DD/YYYY')
+        ELSE TO_DATE(TO_CHAR(NVL(EMPE_END_DT, UPD_DT), 'MM/DD/YYYY'),'MM/DD/YYYY') - TO_DATE(TO_CHAR(NVL(EMPE_ST_DT, sysdate),'MM/DD/YYYY'),'MM/DD/YYYY')
+        END DURATION
+        FROM ADM_USR adm
+        WHERE 1    = 1
+        <if test="lstUsrIdExport != null and lstUsrIdExport.size() &gt; 0">
+            <trim prefix="and USR_ID in ">
+                <foreach item="item" index="index" collection="lstUsrIdExport"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </trim>
+        </if>
+        ORDER BY to_number(EMPE_NO)
+    </select>
+
+    <select id="selectUsrIdByDvcTknCd" parameterType="string" resultType="string">
+        select
+            usr.usr_id
+        from ADM_USR usr
+        where usr.DVC_TKN_CD = #{dvcTknCd}
+    </select>
+
+
+    <resultMap type="UserAssignVO" id="UserAssignMap">
+        <result property="usrId" column="USR_ID" javaType="String"/>
+    </resultMap>
+
+    <select id= "getInactivePlayers" resultMap = "UserAssignMap">
+        SELECT
+        usr_id
+        FROM
+        adm_usr
+        WHERE
+        act_flg != 'Y'
+        AND   is_root = 'N'
+        AND   usr_id IN
+        <foreach item="item" index="index" collection="players"
+                 open="(" separator="," close=")">
+            #{item.plerId}
+        </foreach>
+        ORDER BY
+        usr_id
+    </select>
+</mapper>
