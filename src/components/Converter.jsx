@@ -13,6 +13,7 @@ function Converter() {
 
   // csv format
   const [csvData, setCsvData] = useState([]);
+  const [folderName, setFolderName] = useState("");
 
   const handleFileList = (event) => {
     setSelectedFiles(event.target.files);
@@ -44,7 +45,7 @@ function Converter() {
 
   const generateData = () => {
     const ignoreTags = ["resultMap", "mapper"];
-    const location = "src/main/resources/mappers/";
+    const location = `src/main/resources/mappers/${folderName}/`;
     const data = [];
     for (var i = 0; i < mappers.length; i++) {
       const fullLocation = location + mappers[i].fileName;
@@ -73,6 +74,14 @@ function Converter() {
 
   return (
     <>
+      <Container>
+        <input
+          placeholder="Folder name"
+          onChange={(e) => {
+            setFolderName(e.currentTarget.value);
+          }}
+        />
+      </Container>
       <Container>
         <input type="file" name="file" onChange={handleFileList} multiple />
         <div
